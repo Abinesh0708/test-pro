@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>APEX Logistics &amp; Supply Chain &#8212; Move freight on time</title>
+<meta name="description" content="APEX Logistics: global freight by air, ocean and ground. 320 hubs, 86 countries, one control tower. Track shipments, get lane estimates." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* TOKENS */
+:root{
+  --bg:#ffffff; --surface:#f4f4f4; --ink:#111111; --muted:#6b6b6b;
+  --accent:#1a4be0; --accent-ink:#ffffff; --field:#111111; --field-ink:#ffffff;
+  --ts:1rem;
+  --tb:clamp(1.0625rem,1rem + .25vw,1.1875rem);
+  --th:clamp(2rem,1.3rem + 3.2vw,4rem);
+  --td:clamp(5.5rem,9.8vw,9.375rem);
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{
+  scroll-behavior:smooth;
+  overflow-x:clip;
+  max-width:100%;
+}
+body{
+  margin:0;
+  font-family:"Hanken Grotesk",system-ui,sans-serif;
+  font-weight:400;
+  font-size:var(--tb);
+  line-height:1.45;
+  letter-spacing:-.005em;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:clip;
+  max-width:100%;
+  width:100%;
+}
+h1,h2,h3,h4{font-weight:500;letter-spacing:-.05em;line-height:.95;margin:0;}
+p{margin:0 0 1em;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;text-underline-offset:.15em;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+img,video{display:block;max-width:100%;height:auto;}
+ul{list-style:none;padding:0;margin:0;}
+
+/* LAYOUT (MOBILE FIRST) */
+.wrap{
+  width:100%;
+  max-width:1280px;
+  margin:0 auto;
+  padding:0 20px;
+  overflow-x:clip;
+}
+
+/* NAV */
+.nav{
+  position:fixed;
+  inset:0 0 auto 0;
+  z-index:80;
+  background:var(--bg);
+  padding:12px 0;
+}
+.nav .wrap{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.wordmark{
+  font-weight:500;
+  font-size:1.05rem;
+  letter-spacing:-.04em;
+  color:var(--ink);
+  text-decoration:none;
+}
+.wordmark em{color:var(--accent);font-style:normal;}
+.nav-links{display:none;}
+.nav-cta{display:none;}
+.nav-toggle{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:none;
+  border:0;
+  cursor:pointer;
+  width:44px;
+  height:44px;
+  padding:8px;
+}
+.nav-toggle span{
+  display:block;
+  width:22px;
+  height:2px;
+  background:var(--ink);
+  margin:3px 0;
+  transition:transform 250ms,opacity 250ms;
+}
+.nav-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+.nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0;}
+.nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+.nav-drawer{
+  display:none;
+  position:fixed;
+  inset:58px 0 0;
+  background:var(--bg);
+  z-index:70;
+  padding:32px 24px;
+  flex-direction:column;
+  gap:20px;
+  overflow-y:auto;
+}
+.nav-drawer.open{display:flex;}
+.nav-drawer a{
+  font-size:clamp(1.75rem,5.5vw,2.5rem);
+  font-weight:500;
+  letter-spacing:-.04em;
+  color:var(--ink);
+  text-decoration:none;
+}
+.nav-drawer a:hover{color:var(--accent);}
+
+/* BTN */
+.btn{
+  background:var(--field);
+  color:var(--field-ink);
+  padding:14px 24px;
+  min-height:48px;
+  font-size:var(--ts);
+  font-weight:500;
+  border:0;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-family:inherit;
+  transition:transform 120ms ease,opacity 120ms ease;
+}
+.btn:hover{transform:translateY(-2px);opacity:.9;text-decoration:none;}
+.btn:active{transform:translateY(0);}
+.btn-accent{background:var(--accent);}
+
+/* HERO */
+.hero{padding-top:58px;overflow-x:clip;}
+.hero-media{
+  position:relative;
+  width:100%;
+  height:36vh;
+  min-height:220px;
+  overflow:clip;
+  background:var(--surface);
+}
+.hero-media video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  animation:heroScale 18s ease-in-out infinite alternate;
+}
+@keyframes heroScale{from{transform:scale(1)}to{transform:scale(1.06)}}
+.hero-body{
+  padding-top:40px;
+  padding-bottom:64px;
+  display:flex;
+  flex-direction:column;
+  gap:32px;
+}
+.hero-text{order:1;}
+.hero-anim-wrap{
+  order:2;
+  position:relative;
+  width:100%;
+  aspect-ratio:2/1;
+  max-height:220px;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:clip;
+}
+.world-map-bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  pointer-events:none;
+  user-select:none;
+}
+.world-map-svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  user-select:none;
+  z-index:2;
+}
+.aceternity-arc{
+  stroke-dasharray:1000;
+  stroke-dashoffset:1000;
+  animation:arcStroke 3.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.arc-0{animation-delay:0s;}
+.arc-1{animation-delay:0.4s;}
+.arc-2{animation-delay:0.8s;}
+.arc-3{animation-delay:1.2s;}
+.arc-4{animation-delay:1.6s;}
+.arc-5{animation-delay:2.0s;}
+
+@keyframes arcStroke{
+  0%{stroke-dashoffset:1000;opacity:0;}
+  15%{opacity:1;}
+  65%{stroke-dashoffset:0;opacity:1;}
+  90%,100%{stroke-dashoffset:0;opacity:0.35;}
+}
+.ping-ring{
+  transform-origin:center;
+  animation:pingRipple 2.2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.ping-0{animation-delay:0s;}
+.ping-1{animation-delay:0.4s;}
+.ping-2{animation-delay:0.8s;}
+.ping-3{animation-delay:1.2s;}
+.ping-4{animation-delay:1.6s;}
+.ping-5{animation-delay:2.0s;}
+.ping-6{animation-delay:2.4s;}
+.ping-7{animation-delay:2.8s;}
+
+@keyframes pingRipple{
+  0%{r:2.5;opacity:0.9;stroke-width:1.5;}
+  100%{r:14;opacity:0;stroke-width:0.5;}
+}
+.headline{
+  font-size:clamp(2.75rem, 12vw, 4.5rem);
+  margin:0 0 20px;
+  line-height:.92;
+}
+.line{display:block;overflow:hidden;}
+.line-inner{
+  display:block;
+  transform:translateY(105%);
+  animation:lineReveal 900ms cubic-bezier(.16,1,.3,1) both;
+}
+.line:nth-child(2) .line-inner{animation-delay:110ms;}
+@keyframes lineReveal{to{transform:translateY(0)}}
+.standfirst{
+  font-size:var(--tb);
+  max-width:38ch;
+  color:var(--ink);
+  line-height:1.5;
+  margin-bottom:12px;
+}
+.standfirst-sub{
+  font-size:var(--ts);
+  color:var(--muted);
+  max-width:44ch;
+  line-height:1.55;
+  margin-bottom:28px;
+}
+
+/* FEATURES (MOBILE FIRST) */
+.features{padding:72px 0;}
+.section-intro{
+  max-width:100%;
+  margin-bottom:32px;
+}
+.section-intro h2{
+  font-size:clamp(1.75rem,7vw,2.75rem);
+  margin-bottom:14px;
+}
+.mosaic{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.tile{
+  padding:28px 22px;
+  background:var(--surface);
+  display:flex;
+  flex-direction:column;
+}
+.tile-photo{padding:0;overflow:clip;}
+.tile-photo img{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+}
+.tile-dark{background:var(--field);color:var(--field-ink);}
+.tile-white{background:var(--bg);}
+.tile-num{font-size:clamp(2.5rem,8vw,3.75rem);line-height:.85;letter-spacing:-.05em;font-weight:500;}
+.tile-lbl{font-size:var(--ts);margin-top:8px;color:#cfcfcf;}
+
+/* HOW — FREIGHT OPERATIONS PIPELINE (MOBILE FIRST) */
+.how{padding:72px 0;background:var(--surface);}
+.how-head{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin-bottom:32px;
+}
+.how-head h2{
+  font-size:clamp(1.75rem,7vw,2.75rem);
+  letter-spacing:-.045em;
+  line-height:.95;
+}
+.how-lead{
+  font-size:var(--tb);
+  line-height:1.55;
+  color:var(--ink);
+  max-width:48ch;
+  margin:0;
+}
+.how-board{
+  background:var(--bg);
+  padding:24px 18px;
+  position:relative;
+}
+.how-topbar{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:24px;
+}
+.how-status{
+  font-size:var(--ts);
+  font-weight:500;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.how-status-label{color:var(--muted);}
+.how-status-metric{color:var(--accent);font-weight:500;}
+.how-scenarios{
+  display:flex;
+  width:100%;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.how-scenario-btn{
+  flex:1 1 auto;
+  min-height:44px;
+  background:var(--surface);
+  border:0;
+  color:var(--ink);
+  font-family:inherit;
+  font-size:14px;
+  font-weight:500;
+  padding:10px 14px;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background-color 140ms ease,color 140ms ease;
+}
+.how-scenario-btn:hover,.how-scenario-btn.active{
+  background:var(--field);
+  color:var(--field-ink);
+}
+.how-stages{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+.how-stage-card{
+  background:var(--surface);
+  padding:24px 18px;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+.how-stage-header{
+  margin-bottom:18px;
+  padding-bottom:14px;
+  border-bottom:2px solid rgba(17,17,17,0.08);
+}
+.how-stage-title{
+  font-size:var(--tb);
+  font-weight:500;
+  letter-spacing:-.03em;
+  margin-bottom:4px;
+  color:var(--ink);
+}
+.how-stage-sub{
+  font-size:var(--ts);
+  color:var(--muted);
+  line-height:1.4;
+}
+.manifest-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-bottom:20px;
+}
+.manifest-item{
+  background:var(--bg);
+  padding:14px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.manifest-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.manifest-ref{
+  font-size:var(--ts);
+  font-weight:500;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.manifest-tag{
+  font-size:13.5px;
+  color:var(--accent);
+  font-weight:500;
+}
+.manifest-cargo{
+  font-size:var(--ts);
+  color:var(--muted);
+  line-height:1.4;
+}
+.manifest-route{
+  font-size:13.5px;
+  color:var(--ink);
+  font-weight:500;
+}
+.container-bay{
+  background:var(--bg);
+  padding:18px 16px;
+  margin-bottom:20px;
+}
+.container-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.container-id{
+  font-size:var(--ts);
+  font-weight:500;
+  color:var(--ink);
+}
+.container-badge{
+  font-size:13.5px;
+  background:var(--accent);
+  color:var(--accent-ink);
+  padding:4px 8px;
+  font-weight:500;
+}
+.container-load-visual,
+.load-bar{
+  height:24px;
+  display:flex;
+  background:var(--surface);
+  overflow:hidden;
+  margin-bottom:16px;
+}
+.load-block,
+.load-segment{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12.5px;
+  color:#ffffff !important;
+  font-weight:500;
+  transition:width 400ms ease;
+}
+.load-pvg{background:#111111;color:#ffffff !important;}
+.load-sin{background:var(--accent);color:#ffffff !important;}
+.load-ham{background:#3b65ea;color:#ffffff !important;}
+.container-meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.meta-item{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.meta-label{font-size:13.5px;color:var(--muted);}
+.meta-val{font-size:var(--ts);font-weight:500;color:var(--ink);}
+.meta-val-accent{color:var(--accent);}
+.dispatch-matrix{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-bottom:20px;
+}
+.dispatch-item{
+  background:var(--bg);
+  padding:14px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.dispatch-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.dispatch-dest{
+  font-size:var(--ts);
+  font-weight:500;
+  color:var(--ink);
+}
+.dispatch-status{
+  font-size:13.5px;
+  color:#0d7332;
+  font-weight:500;
+}
+.dispatch-route{
+  font-size:var(--ts);
+  color:var(--muted);
+  line-height:1.4;
+}
+.dispatch-timing{
+  font-size:13.5px;
+  color:var(--ink);
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+.stage-foot{
+  margin-top:auto;
+  padding-top:16px;
+  border-top:2px solid rgba(17,17,17,0.08);
+  font-size:var(--ts);
+  color:var(--ink);
+  line-height:1.5;
+}
+.how-columns{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+  margin-top:32px;
+}
+.how-col{
+  padding:16px 0 0;
+  position:relative;
+}
+.how-col::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:36px;
+  height:3px;
+  background:var(--accent);
+}
+.how-col-title{
+  font-size:var(--tb);
+  font-weight:500;
+  letter-spacing:-.03em;
+  margin-bottom:8px;
+  color:var(--ink);
+}
+.how-col-text{
+  font-size:var(--ts);
+  color:var(--ink);
+  line-height:1.55;
+  margin:0;
+}
+
+/* TRACKER (MOBILE FIRST: CLEAN VERTICAL TIMELINE) */
+.tracker{padding:72px 0;}
+.tracker-grid{
+  display:flex;
+  flex-direction:column;
+  gap:32px;
+}
+.tracker-desc h2{font-size:clamp(1.75rem,7vw,2.75rem);margin-bottom:16px;}
+.track-input-row{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.track-input-row input{
+  background:var(--bg);
+  border:0;
+  border-bottom:2px solid var(--ink);
+  padding:14px 0;
+  min-height:48px;
+  font:inherit;
+  font-size:var(--ts);
+  outline:none;
+}
+.track-input-row input:focus{border-bottom-color:var(--accent);}
+.track-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:20px;
+  font-size:var(--ts);
+  color:var(--muted);
+}
+.track-ref{color:var(--ink);font-weight:500;}
+.track-badge{background:var(--surface);padding:4px 10px;font-size:var(--ts);font-weight:500;}
+
+/* MOBILE VERTICAL PIPELINE */
+.pipeline{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  margin-top:24px;
+  position:relative;
+  padding-left:32px;
+}
+.pipeline::before{
+  content:"";
+  position:absolute;
+  left:8px;
+  top:8px;
+  bottom:8px;
+  width:2px;
+  background:rgba(17,17,17,0.12);
+}
+.pipe-step{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:relative;
+}
+.pipe-connector{display:none;}
+.pipe-dot{
+  position:absolute;
+  left:-32px;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:var(--surface);
+  border:2px solid var(--muted);
+  transition:background 300ms ease,border-color 300ms ease;
+  z-index:2;
+}
+.pipe-dot.done,.pipe-dot.active{
+  background:var(--accent);
+  border-color:var(--accent);
+}
+.pipe-label{
+  font-size:var(--ts);
+  color:var(--muted);
+  line-height:1.35;
+  text-align:left;
+  font-weight:500;
+}
+.pipe-step:has(.pipe-dot.active) .pipe-label,
+.pipe-step:has(.pipe-dot.done) .pipe-label{
+  color:var(--ink);
+}
+.track-detail{
+  margin-top:24px;
+  display:none;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+.track-detail.visible{display:grid;}
+.detail-item .dk{font-size:var(--ts);color:var(--muted);margin-bottom:4px;}
+.detail-item .dv{font-weight:500;}
+.dv-accent{color:var(--accent);}
+
+/* STATS (MOBILE FIRST) */
+.stats{padding:72px 0;}
+.stats-head h2{font-size:clamp(1.75rem,7vw,2.75rem);margin-bottom:32px;}
+.stat-mosaic{
+  display:flex;
+  flex-direction:column;
+  background:var(--bg);
+}
+.stat-photo{
+  position:relative;
+  overflow:clip;
+  height:32vh;
+  min-height:220px;
+}
+.stat-photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.stat-tiles{
+  display:flex;
+  flex-direction:column;
+}
+.stat-tile{
+  flex:1;
+  padding:32px 24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:150px;
+}
+.stat-tile:first-child{background:var(--surface);color:var(--ink);}
+.stat-tile:last-child{background:var(--field);color:var(--field-ink);}
+.stat-tile .fig{
+  font-size:clamp(2.75rem,8vw,3.75rem);
+  line-height:1;
+  letter-spacing:-.04em;
+  font-weight:500;
+  display:block;
+}
+.stat-tile .cap{
+  font-size:var(--ts);
+  color:var(--muted);
+  margin-top:10px;
+  line-height:1.45;
+  max-width:30ch;
+}
+.stat-tile:last-child .cap{color:#d5d5d5;}
+
+.counters{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:24px;
+}
+.counter{
+  padding:24px 20px;
+  background:var(--surface);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.counter .num{
+  font-size:clamp(1.5rem, 5.5vw, 2.5rem);
+  line-height:1.05;
+  letter-spacing:-.04em;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+.counter .lbl{
+  font-size:var(--ts);
+  color:var(--muted);
+  margin-top:8px;
+  line-height:1.4;
+}
+
+/* QUOTE (MOBILE FIRST) */
+.quote{padding:72px 0;background:var(--surface);}
+.quote-inner{
+  display:flex;
+  flex-direction:column;
+  gap:32px;
+}
+.quote-intro h2{font-size:clamp(1.75rem,7vw,2.75rem);margin-bottom:16px;}
+.est label{display:block;font-size:var(--ts);color:var(--muted);margin-bottom:6px;}
+.est input,.est select{
+  background:var(--bg);
+  border:0;
+  border-bottom:2px solid var(--ink);
+  padding:12px 0;
+  min-height:48px;
+  font:inherit;
+  font-size:var(--ts);
+  width:100%;
+  outline:none;
+}
+.est input:focus,.est select:focus{border-bottom-color:var(--accent);}
+.est-grid{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+.est-error{color:#b00020;font-size:var(--ts);margin-top:4px;display:none;}
+.est-result{margin-top:32px;padding:24px;background:var(--bg);display:none;}
+.price-label{font-size:var(--ts);color:var(--muted);margin-bottom:6px;}
+.price-val{font-size:clamp(2rem,6vw,3rem);letter-spacing:-.04em;font-weight:500;}
+.price-note{font-size:var(--ts);color:var(--muted);margin-top:6px;margin-bottom:20px;}
+.result-meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  font-size:var(--ts);
+}
+.result-meta .mk{color:var(--muted);}
+.result-meta .mv{font-weight:500;margin-top:2px;}
+.lead-grid{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin-top:24px;
+}
+.lead-input{
+  background:var(--bg);
+  border:0;
+  border-bottom:2px solid var(--ink);
+  padding:12px 0;
+  min-height:48px;
+  font:inherit;
+  font-size:var(--ts);
+  width:100%;
+  outline:none;
+}
+.lead-input:focus{border-bottom-color:var(--accent);}
+
+/* CTA (MOBILE FIRST) */
+.photo-strip{
+  display:flex;
+  flex-direction:column;
+  height:auto;
+  overflow:clip;
+}
+.photo-strip img{
+  width:100%;
+  height:24vh;
+  min-height:160px;
+  object-fit:cover;
+}
+.cta-band{
+  background:var(--field);
+  color:var(--field-ink);
+  padding:56px 0 64px;
+}
+.cta-inner{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+.cta-statement{
+  font-size:clamp(1.75rem,5.5vw,2.25rem);
+  font-weight:500;
+  letter-spacing:-.04em;
+  line-height:1.15;
+  max-width:28ch;
+}
+.cta-right{display:flex;flex-direction:column;gap:18px;}
+.cta-note{font-size:var(--ts);color:#cfcfcf;max-width:44ch;}
+.cta-link{
+  color:var(--field-ink);
+  text-decoration:underline;
+  text-decoration-thickness:3px;
+  text-underline-offset:5px;
+  text-decoration-color:var(--accent);
+  font-size:var(--ts);
+  font-weight:500;
+}
+.cta-link:hover{color:var(--accent);text-decoration:none;}
+
+/* FOOTER (MOBILE FIRST) */
+.footer{
+  background:var(--field);
+  color:var(--field-ink);
+  padding:60px 0 48px;
+  overflow:clip;
+  border-top:2px solid rgba(255,255,255,0.12);
+}
+.footer-top{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:20px;
+  padding-bottom:28px;
+  border-bottom:2px solid rgba(255,255,255,0.12);
+  margin-bottom:36px;
+}
+.footer-brand{display:flex;flex-direction:column;gap:6px;}
+.footer-name{
+  font-size:clamp(3.5rem, 16vw, 6.5rem);
+  line-height:0.88;
+  letter-spacing:-0.05em;
+  font-weight:600;
+  color:#ffffff;
+  margin:0;
+  padding:0;
+}
+.footer-tagline{
+  font-size:var(--ts);
+  letter-spacing:0.02em;
+  color:var(--muted);
+  font-weight:500;
+}
+.footer-grid{
+  display:flex;
+  flex-direction:column;
+  gap:36px;
+}
+.footer-col-header{
+  font-size:var(--ts);
+  color:var(--muted);
+  margin-bottom:14px;
+  font-weight:600;
+}
+.footer-hubs{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.footer-hubs a{
+  color:#ffffff;
+  font-size:1.15rem;
+  letter-spacing:-0.03em;
+  line-height:1.4;
+  text-decoration:none;
+  transition:color 200ms;
+}
+.footer-hubs a:hover{color:var(--accent);}
+.footer-contact{
+  margin-top:20px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:var(--ts);
+  color:#cfcfcf;
+}
+.footer-contact a{
+  color:#ffffff;
+  text-decoration:none;
+  transition:color 200ms;
+}
+.footer-contact a:hover{color:var(--accent);}
+.footer-links{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+}
+.footer-links h4{
+  font-size:var(--ts);
+  color:var(--muted);
+  margin-bottom:14px;
+  font-weight:600;
+}
+.footer-links ul li{margin-bottom:10px;}
+.footer-links a{
+  color:rgba(255,255,255,0.72);
+  text-decoration:none;
+  font-size:var(--ts);
+  transition:color 180ms ease,transform 180ms ease;
+  display:inline-block;
+}
+.footer-links a:hover{
+  color:#ffffff;
+  transform:translateX(3px);
+}
+.footer-legal{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:44px;
+  padding-top:24px;
+  border-top:2px solid rgba(255,255,255,0.12);
+  font-size:var(--ts);
+  color:var(--muted);
+}
+.footer-legal a{
+  color:var(--muted);
+  text-decoration:none;
+  transition:color 200ms;
+}
+.footer-legal a:hover{color:#ffffff;}
+.credits{
+  font-size:13.5px;
+  color:rgba(255,255,255,0.45);
+  margin-top:16px;
+  line-height:1.6;
+  max-width:88ch;
+}
+.credits a{
+  color:rgba(255,255,255,0.55);
+  text-decoration:underline;
+}
+.credits a:hover{color:rgba(255,255,255,0.85);}
+
+/* MOTION */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 650ms ease,transform 650ms ease;}
+.reveal-d1{transition-delay:80ms;}
+.reveal-d2{transition-delay:160ms;}
+.reveal.in-view{opacity:1;transform:translateY(0);}
+.photo-drift{overflow:clip;touch-action:pan-y;}
+.photo-drift img{transform:scale(1.06);transform-origin:center;transition:transform 8s ease-out;will-change:transform;}
+.photo-drift.in-view img{transform:scale(1);}
+.counter{opacity:0;transform:scale(.96);transition:opacity 500ms ease,transform 500ms ease;}
+.counter.in-view{opacity:1;transform:scale(1);}
+.counter:nth-child(2){transition-delay:80ms;}
+.counter:nth-child(3){transition-delay:160ms;}
+.counter:nth-child(4){transition-delay:240ms;}
+.how-step{opacity:0;transform:translateY(16px);transition:opacity 500ms ease,transform 500ms ease;}
+.how-step.in-view{opacity:1;transform:translateY(0);}
+.how-step:nth-child(2){transition-delay:80ms;}
+.how-step:nth-child(3){transition-delay:160ms;}
+.tile{opacity:0;transform:translateY(12px);transition:opacity 500ms ease,transform 500ms ease;}
+.tile.in-view{opacity:1;transform:translateY(0);}
+.tile:nth-child(2){transition-delay:60ms;}
+.tile:nth-child(3){transition-delay:120ms;}
+.tile:nth-child(4){transition-delay:180ms;}
+.tile:nth-child(5){transition-delay:240ms;}
+.tile:nth-child(6){transition-delay:300ms;}
+.tile:nth-child(7){transition-delay:360ms;}
+.stat-mosaic{opacity:0;transform:translateY(16px);transition:opacity 700ms ease,transform 700ms ease;}
+.stat-mosaic.in-view{opacity:1;transform:translateY(0);}
+.cta-statement{opacity:0;transform:translateY(16px);transition:opacity 700ms ease,transform 700ms ease;}
+.cta-statement.in-view{opacity:1;transform:translateY(0);}
+
+@media(prefers-reduced-motion:reduce){
+  .line-inner{animation:none;transform:none;}
+  .reveal,.counter,.how-step,.tile,.stat-mosaic,.cta-statement{opacity:1;transform:none;transition:none;animation:none;}
+  .hero-media video{animation:none;}
+  .photo-drift img{transform:scale(1);transition:none;}
+}
+
+/* ======================================================== */
+/* PROGRESSIVE ENHANCEMENT 1: TABLET (min-width: 641px)     */
+/* ======================================================== */
+@media(min-width:641px){
+  .wrap{padding:0 32px;}
+  .hero-media{height:42vh;}
+  .hero-body{gap:40px;}
+  .hero-anim-wrap{max-height:240px;}
+  
+  .mosaic{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .t-a,.t-b,.t-e{grid-column:1/-1;}
+  .t-c,.t-d,.t-f,.t-g{grid-column:auto;}
+  
+  .stat-photo{height:36vh;min-height:260px;}
+  .stat-tiles{flex-direction:row;}
+  .stat-tile{min-height:180px;padding:32px 28px;}
+  .counters{grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px;}
+  .counter .num{font-size:clamp(1.75rem,3vw,2.5rem);}
+  
+  .pipeline{
+    flex-direction:row;
+    align-items:flex-start;
+    gap:0;
+    padding-left:0;
+  }
+  .pipeline::before{display:none;}
+  .pipe-step{
+    flex:1;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    position:relative;
+  }
+  .pipe-dot{
+    position:relative;
+    left:auto;
+    width:10px;
+    height:10px;
+    border-radius:0;
+    border:none;
+    box-shadow:none;
+    margin:0 auto 6px;
+    background:var(--surface);
+  }
+  .pipe-dot.done,.pipe-dot.active{
+    background:var(--accent);
+    box-shadow:none;
+  }
+  .pipe-connector{
+    display:block;
+    position:absolute;
+    top:4px;
+    left:50%;
+    right:-50%;
+    height:2px;
+    background:var(--surface);
+    z-index:1;
+    transition:background 300ms;
+  }
+  .pipe-connector.done{background:var(--accent);}
+  .pipe-step:last-child .pipe-connector{display:none;}
+  .pipe-label{
+    font-size:13.5px;
+    text-align:center;
+    color:var(--muted);
+    line-height:1.3;
+    font-weight:400;
+  }
+  
+  .est-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px 32px;
+  }
+  .lead-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  
+  .photo-strip{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    height:32vh;
+  }
+  .photo-strip img{height:100%;min-height:auto;}
+  
+  .footer-links{grid-template-columns:repeat(3,1fr);}
+  .footer-legal{
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:center;
+  }
+}
+
+/* ======================================================== */
+/* PROGRESSIVE ENHANCEMENT 2: DESKTOP (min-width: 1024px)   */
+/* ======================================================== */
+@media(min-width:1024px){
+  .wrap{padding:0 40px;}
+  
+  .nav{padding:14px 0;}
+  .nav-links{display:flex;gap:28px;align-items:center;}
+  .nav-links a{
+    color:var(--ink);
+    font-size:var(--ts);
+    text-decoration:none;
+    transition:color 150ms;
+    position:relative;
+  }
+  .nav-links a::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-2px;
+    width:0;
+    height:2px;
+    background:var(--accent);
+    transition:width 200ms ease;
+  }
+  .nav-links a:hover{color:var(--accent);text-decoration:none;}
+  .nav-links a:hover::after{width:100%;}
+  
+  .nav-cta{
+    display:inline-block;
+    background:var(--field);
+    color:var(--field-ink);
+    padding:10px 20px;
+    min-height:auto;
+    font-size:var(--ts);
+    font-weight:500;
+    border:0;
+    cursor:pointer;
+    text-decoration:none;
+    transition:opacity 150ms;
+  }
+  .nav-cta:hover{opacity:.85;text-decoration:none;}
+  .nav-toggle{display:none;}
+  .nav-drawer{display:none !important;}
+  
+  .hero{padding-top:63px;}
+  .hero-media{height:56vh;min-height:360px;}
+  .hero-body{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:48px;
+    padding-top:80px;
+    padding-bottom:120px;
+    align-items:center;
+  }
+  .hero-text{order:unset;}
+  .hero-anim-wrap{
+    order:unset;
+    max-height:none;
+    aspect-ratio:2/1;
+  }
+  
+  .features{padding:120px 0;}
+  .section-intro{max-width:42%;margin-bottom:56px;}
+  .mosaic{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    grid-auto-rows:minmax(96px,auto);
+    gap:8px;
+  }
+  .tile-photo img{height:100%;}
+  .t-a{grid-column:1/7;grid-row:1/6;}
+  .t-b{grid-column:7/13;grid-row:1/4;}
+  .t-c{grid-column:7/10;grid-row:4/6;}
+  .t-d{grid-column:10/13;grid-row:4/7;}
+  .t-e{grid-column:1/7;grid-row:6/8;}
+  .t-f{grid-column:7/10;grid-row:6/9;}
+  .t-g{grid-column:10/13;grid-row:7/9;}
+  
+  .how{padding:120px 0;}
+  .how-head{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:48px;
+    align-items:end;
+    margin-bottom:48px;
+  }
+  .how-board{padding:40px;}
+  .how-topbar{
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:36px;
+  }
+  .how-scenarios{width:auto;}
+  .how-stages{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:28px;
+  }
+  .how-stage-card{padding:28px 24px;}
+  .how-columns{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:32px;
+    margin-top:40px;
+  }
+  
+  .tracker{padding:120px 0;}
+  .tracker-grid{
+    display:grid;
+    grid-template-columns:5fr 7fr;
+    gap:40px;
+    align-items:start;
+    margin-top:48px;
+  }
+  .track-input-row{flex-direction:row;}
+  
+  .stats{padding:120px 0;}
+  .stat-mosaic{
+    display:grid;
+    grid-template-columns:1.8fr 1.2fr;
+    min-height:520px;
+  }
+  .stat-photo{height:auto;min-height:360px;}
+  .stat-tiles{flex-direction:column;height:100%;}
+  .stat-tile{
+    padding:44px 40px;
+    min-height:240px;
+  }
+  .counters{
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-top:40px;
+  }
+  .counter{padding:32px 28px;}
+  .counter .num{font-size:clamp(2rem, 3.2vw, 2.75rem);}
+  
+  .quote{padding:120px 0;}
+  .quote-inner{
+    display:grid;
+    grid-template-columns:5fr 7fr;
+    gap:40px;
+    align-items:start;
+    margin-top:48px;
+  }
+  
+  .photo-strip{height:42vh;}
+  .cta-band{padding:80px 0 96px;}
+  .cta-inner{
+    display:grid;
+    grid-template-columns:5fr 7fr;
+    gap:40px;
+    align-items:center;
+  }
+  .cta-statement{font-size:clamp(1.75rem,2.8vw,2.5rem);}
+  
+  .footer{padding:80px 0 64px;}
+  .footer-top{
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:52px;
+    padding-bottom:36px;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:5fr 7fr;
+    gap:56px;
+    align-items:start;
+  }
+  .footer-hubs a{font-size:clamp(1.15rem, 1.7vw, 1.5rem);}
+  .footer-name{font-size:clamp(4.5rem, 11vw, 8.5rem);}
+}
+</style>
+</head>
+<body>
+
+<header class="nav" id="top">
+  <div class="wrap">
+    <a href="#top" class="wordmark">APEX <em>LOGISTICS</em></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="#features">Services</a>
+      <a href="#how">Process</a>
+      <a href="#tracker">Track</a>
+      <a href="#stats">Network</a>
+      <a href="#quote">Quote</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navDrawer" aria-label="Open navigation">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="#tracker" class="nav-cta">Track shipment</a>
+  </div>
+</header>
+
+<nav class="nav-drawer" id="navDrawer" aria-label="Mobile navigation">
+  <a href="#features">Services</a>
+  <a href="#how">Process</a>
+  <a href="#tracker">Track</a>
+  <a href="#stats">Network</a>
+  <a href="#quote">Quote</a>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section id="hero" class="hero">
+  <div class="hero-media">
+    <video autoplay muted loop playsinline preload="metadata"
+      poster="assets/hamburg-timelapse-test-poster.jpg"
+      width="854" height="480" aria-hidden="true">
+      <source src="assets/hamburg-timelapse-test.webm" type="video/webm" />
+    </video>
+  </div>
+  <div class="wrap hero-body">
+    <!-- ACETERNITY UI WORLD MAP (MATCHING SITE PALETTE) -->
+    <div class="hero-anim-wrap" aria-hidden="true">
+      <!-- Dotted Map SVG Background -->
+      <img src="assets/world-map.svg" class="world-map-bg" alt="Dotted World Map" />
+      
+      <!-- Interactive SVG Layer for Arcs & Glowing Nodes -->
+      <svg viewBox="0 0 800 400" class="world-map-svg">
+        <defs>
+          <linearGradient id="arc-grad-0" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#1a4be0" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#1a4be0" stop-opacity="1" />
+          </linearGradient>
+          <linearGradient id="arc-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1a4be0" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#1a4be0" stop-opacity="1" />
+          </linearGradient>
+          <linearGradient id="arc-grad-2" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#1a4be0" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#1a4be0" stop-opacity="1" />
+          </linearGradient>
+          <linearGradient id="arc-grad-3" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#1a4be0" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#1a4be0" stop-opacity="1" />
+          </linearGradient>
+          <linearGradient id="arc-grad-4" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#1a4be0" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#1a4be0" stop-opacity="1" />
+          </linearGradient>
+          <linearGradient id="arc-grad-5" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1a4be0" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#1a4be0" stop-opacity="1" />
+          </linearGradient>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+
+        <!-- Route 0: Alaska -> Los Angeles -->
+        <path d="M 67.8 57.3 Q 102.5 7.3 137.2 124.3" fill="none" stroke="#1a4be0" stroke-width="1" stroke-opacity="0.16" />
+        <path d="M 67.8 57.3 Q 102.5 7.3 137.2 124.3" fill="none" stroke="url(#arc-grad-0)" stroke-width="2" class="aceternity-arc arc-0" filter="url(#glow)" />
+
+        <!-- Route 1: Alaska -> Brasília -->
+        <path d="M 67.8 57.3 Q 180.7 7.3 293.6 235.1" fill="none" stroke="#1a4be0" stroke-width="1" stroke-opacity="0.16" />
+        <path d="M 67.8 57.3 Q 180.7 7.3 293.6 235.1" fill="none" stroke="url(#arc-grad-1)" stroke-width="2" class="aceternity-arc arc-1" filter="url(#glow)" />
+
+        <!-- Route 2: Brasília -> Lisbon -->
+        <path d="M 293.6 235.1 Q 336.6 64 379.7 114" fill="none" stroke="#1a4be0" stroke-width="1" stroke-opacity="0.16" />
+        <path d="M 293.6 235.1 Q 336.6 64 379.7 114" fill="none" stroke="url(#arc-grad-2)" stroke-width="2" class="aceternity-arc arc-2" filter="url(#glow)" />
+
+        <!-- Route 3: London -> New Delhi -->
+        <path d="M 399.7 85.5 Q 485.6 35.5 571.6 136.4" fill="none" stroke="#1a4be0" stroke-width="1" stroke-opacity="0.16" />
+        <path d="M 399.7 85.5 Q 485.6 35.5 571.6 136.4" fill="none" stroke="url(#arc-grad-3)" stroke-width="2" class="aceternity-arc arc-3" filter="url(#glow)" />
+
+        <!-- Route 4: New Delhi -> Vladivostok -->
+        <path d="M 571.6 136.4 Q 632.4 54.1 693.1 104.1" fill="none" stroke="#1a4be0" stroke-width="1" stroke-opacity="0.16" />
+        <path d="M 571.6 136.4 Q 632.4 54.1 693.1 104.1" fill="none" stroke="url(#arc-grad-4)" stroke-width="2" class="aceternity-arc arc-4" filter="url(#glow)" />
+
+        <!-- Route 5: New Delhi -> Nairobi -->
+        <path d="M 571.6 136.4 Q 526.7 86.4 481.8 202.9" fill="none" stroke="#1a4be0" stroke-width="1" stroke-opacity="0.16" />
+        <path d="M 571.6 136.4 Q 526.7 86.4 481.8 202.9" fill="none" stroke="url(#arc-grad-5)" stroke-width="2" class="aceternity-arc arc-5" filter="url(#glow)" />
+
+        <!-- Nodes with Pulsing Rings -->
+        <!-- Alaska (Fairbanks) -->
+        <g transform="translate(67.8, 57.3)">
+          <circle cx="0" cy="0" r="3" fill="#1a4be0" />
+          <circle cx="0" cy="0" r="1.3" fill="#ffffff" />
+          <circle cx="0" cy="0" r="3" fill="none" stroke="#1a4be0" stroke-width="1" class="ping-ring ping-0" />
+        </g>
+        <!-- Los Angeles -->
+        <g transform="translate(137.2, 124.3)">
+          <circle cx="0" cy="0" r="3" fill="#1a4be0" />
+          <circle cx="0" cy="0" r="1.3" fill="#ffffff" />
+          <circle cx="0" cy="0" r="3" fill="none" stroke="#1a4be0" stroke-width="1" class="ping-ring ping-1" />
+        </g>
+        <!-- Brasília -->
+        <g transform="translate(293.6, 235.1)">
+          <circle cx="0" cy="0" r="3" fill="#1a4be0" />
+          <circle cx="0" cy="0" r="1.3" fill="#ffffff" />
+          <circle cx="0" cy="0" r="3" fill="none" stroke="#1a4be0" stroke-width="1" class="ping-ring ping-2" />
+        </g>
+        <!-- Lisbon -->
+        <g transform="translate(379.7, 114)">
+          <circle cx="0" cy="0" r="3" fill="#1a4be0" />
+          <circle cx="0" cy="0" r="1.3" fill="#ffffff" />
+          <circle cx="0" cy="0" r="3" fill="none" stroke="#1a4be0" stroke-width="1" class="ping-ring ping-3" />
+        </g>
+        <!-- London -->
+        <g transform="translate(399.7, 85.5)">
+          <circle cx="0" cy="0" r="3" fill="#1a4be0" />
+          <circle cx="0" cy="0" r="1.3" fill="#ffffff" />
+          <circle cx="0" cy="0" r="3" fill="none" stroke="#1a4be0" stroke-width="1" class="ping-ring ping-4" />
+        </g>
+        <!-- New Delhi -->
+        <g transform="translate(571.6, 136.4)">
+          <circle cx="0" cy="0" r="3" fill="#1a4be0" />
+          <circle cx="0" cy="0" r="1.3" fill="#ffffff" />
+          <circle cx="0" cy="0" r="3" fill="none" stroke="#1a4be0" stroke-width="1" class="ping-ring ping-5" />
+        </g>
+        <!-- Vladivostok -->
+        <g transform="translate(693.1, 104.1)">
+          <circle cx="0" cy="0" r="3" fill="#1a4be0" />
+          <circle cx="0" cy="0" r="1.3" fill="#ffffff" />
+          <circle cx="0" cy="0" r="3" fill="none" stroke="#1a4be0" stroke-width="1" class="ping-ring ping-6" />
+        </g>
+        <!-- Nairobi -->
+        <g transform="translate(481.8, 202.9)">
+          <circle cx="0" cy="0" r="3" fill="#1a4be0" />
+          <circle cx="0" cy="0" r="1.3" fill="#ffffff" />
+          <circle cx="0" cy="0" r="3" fill="none" stroke="#1a4be0" stroke-width="1" class="ping-ring ping-7" />
+        </g>
+      </svg>
+    </div>
+    <!-- HERO TEXT -->
+    <div class="hero-text">
+      <h1 class="headline">
+        <span class="line"><span class="line-inner">Move</span></span>
+        <span class="line"><span class="line-inner">on time.</span></span>
+      </h1>
+      <p class="standfirst reveal">Air, ocean and ground freight in one control tower. 320 hubs across 86 countries, one promise on every shipment.</p>
+      <p class="standfirst-sub reveal reveal-d1">AWB, bill of lading or container number &#8212; one reference, every mode.</p>
+      <a href="#tracker" class="btn reveal reveal-d2">Track a shipment</a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="features">
+  <div class="wrap">
+    <div class="section-intro reveal">
+      <h2>Freight without surprises.</h2>
+      <p style="color:var(--ink);max-width:38ch;">Six capabilities, one operating system. Each accountable to a milestone you can see.</p>
+    </div>
+    <div class="mosaic">
+      <div class="tile t-a">
+        <h3 style="font-size:clamp(1.85rem,3vw,2.5rem);letter-spacing:-.04em;line-height:1.05;margin-bottom:16px;">Six services,<br>one system.</h3>
+        <p style="color:var(--ink);max-width:32ch;">Air, ocean, ground, warehousing and supply-chain consulting on lanes we run weekly.</p>
+        <p style="font-size:var(--ts);color:var(--muted);margin-top:auto;">99.6% on-time pickup &nbsp;&middot;&nbsp; 2.1-day air transit &nbsp;&middot;&nbsp; 14,200 TEU monthly</p>
+      </div>
+      <div class="tile tile-photo t-b photo-drift">
+        <img src="assets/singapore-port-panorama.jpg" width="1920" height="354"
+          alt="Panorama of the Port of Singapore at dusk" loading="lazy" decoding="async" />
+      </div>
+      <div class="tile tile-dark t-c" style="justify-content:space-between;">
+        <div class="tile-num" data-count="320">320</div>
+        <div class="tile-lbl">hubs on five continents</div>
+      </div>
+      <div class="tile t-d">
+        <ul style="display:flex;flex-direction:column;gap:6px;">
+          <li style="font-size:var(--ts);">Air freight</li>
+          <li style="font-size:var(--ts);">Ocean freight &#8212; FCL and LCL</li>
+          <li style="font-size:var(--ts);">Ground trucking &#8212; FTL and LTL</li>
+          <li style="font-size:var(--ts);">Warehousing and 3PL</li>
+          <li style="font-size:var(--ts);">Customs brokerage</li>
+          <li style="font-size:var(--ts);">Supply-chain consulting</li>
+        </ul>
+        <p style="font-size:var(--ts);color:var(--muted);margin-top:auto;">One reference covers every mode.</p>
+      </div>
+      <div class="tile tile-white t-e" style="justify-content:center;">
+        <p style="font-size:clamp(1.4rem,2.2vw,1.85rem);letter-spacing:-.03em;line-height:1.2;max-width:24ch;margin:0;font-weight:500;">Exceptions surface before you ask.</p>
+        <p style="color:var(--muted);font-size:var(--ts);margin-top:12px;max-width:36ch;">A customs hold or a reroute is flagged in minutes, not days.</p>
+      </div>
+      <div class="tile tile-photo t-f photo-drift">
+        <img src="assets/maersk-hanoi-container-ship-port-koper-sikop.jpg" width="1920" height="1439"
+          alt="Container ship MAERSK HANOI at Port Koper" loading="lazy" decoding="async" />
+      </div>
+      <div class="tile tile-white t-g" style="justify-content:center;">
+        <p style="font-size:var(--tb);line-height:1.3;max-width:24ch;margin:0;">Pricing by lane, not by category. Market rates updated hourly, all in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW — FREIGHT OPERATIONS PIPELINE (BUSINESS-LED DESIGN) -->
+<section id="how" class="how">
+  <div class="wrap">
+    <div class="how-head reveal">
+      <div>
+        <h2>Order to delivery, engineered.</h2>
+      </div>
+      <div>
+        <p class="how-lead">One document, one status, one owner. See how APEX normalises fragmented international shipments into a single high-velocity pipeline.</p>
+      </div>
+    </div>
+
+    <div class="how-board reveal reveal-d1" id="howVisualizer">
+      <div class="how-topbar">
+        <div class="how-status" id="howStatus">
+          <span class="how-status-label">Active freight stream:</span>
+          <span class="how-status-metric" id="howStatusMetric">High-Tech Electronics · Shanghai (PVG) to Rotterdam Gateway (RTM)</span>
+        </div>
+        <div class="how-scenarios" role="group" aria-label="Freight stream scenarios">
+          <button type="button" class="how-scenario-btn active" data-scenario="electronics">High-tech electronics</button>
+          <button type="button" class="how-scenario-btn" data-scenario="pharma">Pharma cold-chain</button>
+          <button type="button" class="how-scenario-btn" data-scenario="automotive">Automotive assembly</button>
+        </div>
+      </div>
+
+      <!-- 3 STAGES PANORAMIC BOARD -->
+      <div class="how-stages">
+        <!-- STAGE 1: COLLECT -->
+        <div class="how-stage-card" data-stage="0">
+          <div class="how-stage-header">
+            <h3 class="how-stage-title">Collect</h3>
+            <div class="how-stage-sub">Multi-modal origin intake across 320 international hubs</div>
+          </div>
+          <div class="manifest-list" id="stage1Manifests">
+            <div class="manifest-item">
+              <div class="manifest-top">
+                <span class="manifest-ref">AWB-88210-PVG</span>
+                <span class="manifest-tag">Weighed &amp; barcoded</span>
+              </div>
+              <div class="manifest-cargo">8 skids · 1,450 kg · Semiconductor units</div>
+              <div class="manifest-route">Shanghai Pudong Airport Gate 3</div>
+            </div>
+            <div class="manifest-item">
+              <div class="manifest-top">
+                <span class="manifest-ref">BOL-44091-SIN</span>
+                <span class="manifest-tag">Customs bonded</span>
+              </div>
+              <div class="manifest-cargo">14 crates · 3,820 kg · Telemetry sensors</div>
+              <div class="manifest-route">Port of Singapore Jurong Berth 8</div>
+            </div>
+            <div class="manifest-item">
+              <div class="manifest-top">
+                <span class="manifest-ref">CMR-19402-HAM</span>
+                <span class="manifest-tag">Dock received</span>
+              </div>
+              <div class="manifest-cargo">6 pallets · 920 kg · Optical cabling</div>
+              <div class="manifest-route">Hamburg Hub Central Receiving</div>
+            </div>
+          </div>
+          <div class="stage-foot">
+            100% digital check-in. Every piece assigned one universal tracking reference before moving.
+          </div>
+        </div>
+
+        <!-- STAGE 2: CONSOLIDATE -->
+        <div class="how-stage-card" data-stage="1">
+          <div class="how-stage-header">
+            <h3 class="how-stage-title">Consolidate</h3>
+            <div class="how-stage-sub">Cross-modal grouping &amp; customs pre-clearance</div>
+          </div>
+          <div class="container-bay" id="stage2Container">
+            <div class="container-header">
+              <span class="container-name" id="containerId">40ft High Cube #APEX-U-84920</span>
+              <span class="container-badge" id="containerStatus">Stowed &amp; sealed</span>
+            </div>
+            <div class="container-load-visual" aria-label="Container capacity allocation visual">
+              <div class="load-block load-pvg" id="loadPvg" title="Shanghai origin cargo: 34%">PVG 34%</div>
+              <div class="load-block load-sin" id="loadSin" title="Singapore origin cargo: 44%">SIN 44%</div>
+              <div class="load-block load-ham" id="loadHam" title="Hamburg origin cargo: 18%">HAM 18%</div>
+            </div>
+            <div class="container-meta">
+              <div class="meta-item">
+                <span class="meta-label">Cube efficiency</span>
+                <span class="meta-val" id="metaCube">96.4% utilized</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Master manifest</span>
+                <span class="meta-val" id="metaMbl">MBL-APX-77401</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Customs status</span>
+                <span class="meta-val" id="metaCustoms">Harmonised HS filing</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Yard dwell</span>
+                <span class="meta-val" id="metaDwell">42 min average</span>
+              </div>
+            </div>
+          </div>
+          <div class="stage-foot">
+            Lanes and carriers compressed into dedicated transit corridors. Zero duplicate handling, zero idle yard time.
+          </div>
+        </div>
+
+        <!-- STAGE 3: DELIVER -->
+        <div class="how-stage-card" data-stage="2">
+          <div class="how-stage-header">
+            <h3 class="how-stage-title">Deliver</h3>
+            <div class="how-stage-sub">Terminal dispatch matrix &amp; verified milestone release</div>
+          </div>
+          <div class="dispatch-list" id="stage3Dispatch">
+            <div class="dispatch-item">
+              <div class="dispatch-top">
+                <span class="dispatch-dest">Rotterdam Maasvlakte Gateway</span>
+                <span class="dispatch-status">Cleared &amp; rolling</span>
+              </div>
+              <div class="dispatch-route">Feeder rail link &middot; Platform 3B</div>
+              <div class="dispatch-timing">Departed 14:30 UTC &middot; On time</div>
+            </div>
+            <div class="dispatch-item">
+              <div class="dispatch-top">
+                <span class="dispatch-dest">Los Angeles Intermodal Port</span>
+                <span class="dispatch-status">Gate out verified</span>
+              </div>
+              <div class="dispatch-route">Bonded linehaul chassis &middot; Lane 4</div>
+              <div class="dispatch-timing">Departed 18:15 UTC &middot; On time</div>
+            </div>
+            <div class="dispatch-item">
+              <div class="dispatch-top">
+                <span class="dispatch-dest">Dubai Logistics City Terminal</span>
+                <span class="dispatch-status">e-POD confirmed</span>
+              </div>
+              <div class="dispatch-route">Direct apron transfer &middot; Gate C-02</div>
+              <div class="dispatch-timing">Delivered 21:00 UTC &middot; Signature captured</div>
+            </div>
+          </div>
+          <div class="stage-foot">
+            Calibrated milestone delivery with guaranteed proof of delivery issued within 90 minutes of arrival.
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM SUMMARY COLUMNS -->
+      <div class="how-columns">
+        <div class="how-col">
+          <h4 class="how-col-title">Single universal reference</h4>
+          <p class="how-col-text">AWB, bill of lading or consignment note: every shipment receives one sovereign tracking reference that survives carrier handoffs and customs transfer.</p>
+        </div>
+        <div class="how-col">
+          <h4 class="how-col-title">Pre-cleared corridors</h4>
+          <p class="how-col-text">Cross-dock grouping packages multi-mode freight into unified containers with single-manifest clearance, cutting dwell times from days to under one hour.</p>
+        </div>
+        <div class="how-col">
+          <h4 class="how-col-title">Continuous milestone truth</h4>
+          <p class="how-col-text">From port apron to factory door, dispatch operates against committed SLAs with tamper-evident digital timestamps and electronic proof of delivery.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRACKER -->
+<section id="tracker" class="tracker">
+  <div class="wrap">
+    <div class="tracker-grid">
+      <div class="tracker-desc reveal">
+        <h2>Track.</h2>
+        <p style="margin-top:16px;">Real-time status for every APEX reference. Enter an AWB, bill of lading or container number.</p>
+        <p style="margin-top:12px;color:var(--muted);font-size:var(--ts);">Every reference, one timeline. Exceptions surface before you ask, and proof of delivery lands in hours.</p>
+      </div>
+      <div class="reveal reveal-d1">
+        <form id="trackForm">
+          <div class="track-input-row">
+            <input id="trackInput" type="text"
+              placeholder="APEX-7742910-DEL or MSCU1234567"
+              aria-label="Tracking reference" autocomplete="off" />
+            <button type="submit" class="btn">Track shipment</button>
+          </div>
+          <div id="trackErr" style="color:#b00020;font-size:var(--ts);margin-top:8px;display:none;">
+            Enter a reference of at least 6 characters.
+          </div>
+        </form>
+        <div class="track-meta">
+          <span>Reference: <span class="track-ref" id="trackRef">&#8212;</span></span>
+          <span class="track-badge" id="trackStatus">Awaiting input</span>
+        </div>
+        <div class="pipeline" id="pipeline" role="list"></div>
+        <div class="track-detail" id="trackDetail">
+          <div class="detail-item"><div class="dk">Origin</div><div class="dv" id="dOrigin">&#8212;</div></div>
+          <div class="detail-item"><div class="dk">Destination</div><div class="dv" id="dDest">&#8212;</div></div>
+          <div class="detail-item"><div class="dk">Mode</div><div class="dv" id="dMode">&#8212;</div></div>
+          <div class="detail-item"><div class="dk">ETA</div><div class="dv dv-accent" id="dEta">&#8212;</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats" class="stats">
+  <div class="wrap">
+    <div class="stats-head reveal"><h2>By the numbers.</h2></div>
+    <div class="stat-mosaic reveal">
+      <div class="stat-photo photo-drift">
+        <img src="assets/port-of-singapore-keppel-terminal.jpg" width="1920" height="1440"
+          alt="Keppel Container Terminal, Singapore" loading="lazy" decoding="async" />
+      </div>
+      <div class="stat-tiles">
+        <div class="stat-tile">
+          <div class="stat-tile-inner">
+            <div class="fig" data-count="320">320</div>
+            <div class="cap">Active hubs across five continents</div>
+          </div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-tile-inner">
+            <div class="fig" data-count="86">86</div>
+            <div class="cap">Countries with dedicated clearance</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="counters">
+      <div class="counter"><div class="num" data-count="12400000">12,400,000</div><div class="lbl">metric tons annually</div></div>
+      <div class="counter"><div class="num" data-count="99.2" data-suffix="%" data-dec="1">99.2%</div><div class="lbl">on-time delivery</div></div>
+      <div class="counter"><div class="num" data-count="1840">1,840</div><div class="lbl">active lanes</div></div>
+      <div class="counter"><div class="num" data-count="2.4" data-suffix="M" data-dec="1">2.4M</div><div class="lbl">units shipped monthly</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section id="quote" class="quote">
+  <div class="wrap">
+    <div class="quote-inner">
+      <div class="quote-intro reveal">
+        <h2>Price your lane.</h2>
+        <p style="margin-top:16px;">A lane-aware estimate in seconds. Convert to a firm quote with one step.</p>
+        <p style="margin-top:12px;font-size:var(--ts);color:var(--muted);">Rates updated hourly across all modes. All-in pricing with fuel surcharge included.</p>
+      </div>
+      <div class="reveal reveal-d1">
+        <form id="estForm" class="est">
+          <div class="est-grid">
+            <div>
+              <label for="estOrigin">Origin</label>
+              <input id="estOrigin" type="text" placeholder="Shanghai (PVG)" autocomplete="off" />
+              <div id="eOrigin" class="est-error">Origin required.</div>
+            </div>
+            <div>
+              <label for="estDest">Destination</label>
+              <input id="estDest" type="text" placeholder="Rotterdam (RTM)" autocomplete="off" />
+              <div id="eDest" class="est-error">Destination required.</div>
+            </div>
+            <div>
+              <label for="estWeight">Weight (kg)</label>
+              <input id="estWeight" type="number" min="1" placeholder="500" />
+              <div id="eWeight" class="est-error">Valid weight required.</div>
+            </div>
+            <div>
+              <label for="estMode">Mode</label>
+              <select id="estMode">
+                <option value="air">Air freight</option>
+                <option value="ocean">Ocean FCL</option>
+                <option value="lcl">Ocean LCL</option>
+                <option value="road">Ground trucking</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn" style="margin-top:28px;">Get estimate</button>
+        </form>
+        <div class="est-result" id="estResult">
+          <div class="price-label">Estimated all-in cost</div>
+          <div class="price-val" id="estPrice">$0.00</div>
+          <div class="price-note">Range &#177;8%, subject to lane availability and fuel surcharge.</div>
+          <div class="result-meta">
+            <div><div class="mk">Transit</div><div class="mv" id="estTransit">&#8212;</div></div>
+            <div><div class="mk">Lane</div><div class="mv" id="estLane">&#8212;</div></div>
+          </div>
+          <div class="lead-grid">
+            <input class="lead-input" id="leadName" type="text" placeholder="Full name" />
+            <input class="lead-input" id="leadEmail" type="email" placeholder="Work email" />
+          </div>
+          <div id="eLead" style="color:#b00020;font-size:var(--ts);margin-top:8px;display:none;">Name and valid email required.</div>
+          <button type="button" class="btn btn-accent" style="margin-top:16px;width:100%;" id="leadSubmit">Convert to firm quote</button>
+          <div id="leadOk" style="color:#1a7f37;font-size:var(--ts);margin-top:8px;display:none;">Quote request received. We will reply within two hours.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA STRIP -->
+<section class="cta">
+  <div class="photo-strip">
+    <img src="assets/the-new-container-ship-oocl-singapore-on.jpg" width="1920" height="1522"
+      alt="Container ship OOCL Singapore at sea" loading="lazy" decoding="async" />
+    <img src="assets/port-of-singapore-keppel-terminal.jpg" width="1920" height="1440"
+      alt="Keppel terminal cranes and stacked containers" loading="lazy" decoding="async" />
+    <img src="assets/arabistan-wa-bahr-ahmar-arabian-peninsula-and.jpg" width="1920" height="1614"
+      alt="1896 navigational map of the Arabian Peninsula and Red Sea" loading="lazy" decoding="async" />
+  </div>
+  <div class="cta-band">
+    <div class="wrap">
+      <div class="cta-inner">
+        <p class="cta-statement reveal">Ten thousand shipments a month, one owner for each.</p>
+        <div class="cta-right reveal reveal-d1">
+          <a href="mailto:quotes@apex-logistics.example?subject=Freight%20quote%20request" class="cta-link">Request a firm quote &#8594;</a>
+          <p class="cta-note">Carbon options, bonded storage and customs brokerage on request. Terms indicative; firm quote within two hours.</p>
+          <a href="#tracker" class="btn" style="display:inline-block;width:fit-content;">Track a shipment</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-name">APEX</div>
+        <div class="footer-tagline">Global Freight Operating System</div>
+      </div>
+    </div>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-col-header">Primary Gateways</div>
+        <div class="footer-hubs">
+          <a href="#">Singapore</a>
+          <a href="#">Rotterdam</a>
+          <a href="#">Los Angeles</a>
+          <a href="#">Dubai</a>
+          <a href="#">Shanghai</a>
+        </div>
+        <div class="footer-contact">
+          <div><a href="mailto:hello@apex-logistics.example">hello@apex-logistics.example</a></div>
+          <div>+65 6000 0000</div>
+          <div style="margin-top:6px;font-size:13.5px;color:rgba(255,255,255,0.45);">Control Tower: 12 Marina Boulevard, Singapore</div>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div>
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#features">Air freight</a></li>
+            <li><a href="#features">Ocean freight</a></li>
+            <li><a href="#features">Ground trucking</a></li>
+            <li><a href="#features">Warehousing &amp; 3PL</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About APEX</a></li>
+            <li><a href="#">Sustainability</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Press &amp; Media</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">API Reference</a></li>
+            <li><a href="#">System status</a></li>
+            <li><a href="#">Privacy and terms</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-legal">
+      <span>&#169; 2026 APEX Logistics Group. All rights reserved.</span>
+      <a href="#top">Back to top &#8593;</a>
+    </div>
+    <p class="credits">Pictures and footage:
+      <a href="https://commons.wikimedia.org/w/index.php?curid=2991026">&#8220;Singapore port panorama&#8221;</a> by Kroisenbrunner, CC BY-SA 3.0;
+      <a href="https://commons.wikimedia.org/w/index.php?curid=765596">&#8220;Port of Singapore Keppel Terminal&#8221;</a> by Calvin Teo, CC BY-SA 2.5;
+      <a href="https://commons.wikimedia.org/w/index.php?curid=144715351">&#8220;MAERSK HANOI&#8221;</a> by Petar Milo&#353;evi&#263;, CC BY-SA 4.0;
+      <a href="https://commons.wikimedia.org/w/index.php?curid=33838919">&#8220;OOCL Singapore&#8221;</a> by Buonasera, CC BY-SA 3.0;
+      <a href="https://commons.wikimedia.org/wiki/File:1896_Strait_of_Hormuz_map_(cropped).jpg">Hormuz map 1896</a>, public domain;
+      <a href="https://commons.wikimedia.org/wiki/File:Hamburg_(Timelapse-Test).webm">&#8220;Hamburg (Timelapse-Test)&#8221;</a> by Christian Andersen, CC BY 3.0;
+      all via Wikimedia Commons, reused under their licences without alteration.
+    </p>
+  </div>
+</footer>
+
+<script>
+/* NAV MOBILE TOGGLE */
+(function(){
+  var t=document.getElementById('navToggle'),d=document.getElementById('navDrawer');
+  if(!t||!d)return;
+  t.addEventListener('click',function(){
+    var open=t.getAttribute('aria-expanded')==='true';
+    t.setAttribute('aria-expanded',String(!open));
+    t.setAttribute('aria-label',open?'Open navigation':'Close navigation');
+    d.classList.toggle('open',!open);
+    document.body.style.overflow=open?'':'hidden';
+  });
+  d.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click',function(){
+      t.setAttribute('aria-expanded','false');
+      t.setAttribute('aria-label','Open navigation');
+      d.classList.remove('open');
+      document.body.style.overflow='';
+    });
+  });
+})();
+
+/* HOW IT WORKS — FREIGHT OPERATIONS SCENARIO & MANIFEST ENGINE */
+(function(){
+  var scenarios = {
+    electronics: {
+      stream: 'High-Tech Electronics · Shanghai (PVG) to Rotterdam Gateway (RTM)',
+      manifests: [
+        { ref: 'AWB-88210-PVG', tag: 'Weighed & barcoded', cargo: '8 skids · 1,450 kg · Semiconductor units', route: 'Shanghai Pudong Airport Gate 3' },
+        { ref: 'BOL-44091-SIN', tag: 'Customs bonded', cargo: '14 crates · 3,820 kg · Telemetry sensors', route: 'Port of Singapore Jurong Berth 8' },
+        { ref: 'CMR-19402-HAM', tag: 'Dock received', cargo: '6 pallets · 920 kg · Optical cabling', route: 'Hamburg Hub Central Receiving' }
+      ],
+      container: {
+        id: '40ft High Cube #APEX-U-84920',
+        badge: 'Stowed & sealed',
+        pvgW: '34%', sinW: '44%', hamW: '18%',
+        cube: '96.4% utilized',
+        mbl: 'MBL-APX-77401',
+        customs: 'Harmonised HS filing',
+        dwell: '42 min average'
+      },
+      dispatches: [
+        { dest: 'Rotterdam Maasvlakte Gateway', status: 'Cleared & rolling', route: 'Feeder rail link · Platform 3B', timing: 'Departed 14:30 UTC · On time' },
+        { dest: 'Los Angeles Intermodal Port', status: 'Gate out verified', route: 'Bonded linehaul chassis · Lane 4', timing: 'Departed 18:15 UTC · On time' },
+        { dest: 'Dubai Logistics City Terminal', status: 'e-POD confirmed', route: 'Direct apron transfer · Gate C-02', timing: 'Delivered 21:00 UTC · Signature captured' }
+      ]
+    },
+    pharma: {
+      stream: 'Pharma Cold-Chain · Frankfurt (FRA) to Dubai DWC & Chicago (ORD)',
+      manifests: [
+        { ref: 'AWB-90412-FRA', tag: 'Active reefer +4°C', cargo: '4 temp-controlled ULDs · 2,100 kg · Biologics', route: 'Frankfurt CargoCity South Apron' },
+        { ref: 'BOL-62104-BSL', tag: 'GDP validated', cargo: '8 thermal shippers · 1,180 kg · Vaccines', route: 'Basel Life Science Hub Dock 2' },
+        { ref: 'CMR-33019-AMS', tag: 'Dry ice monitored', cargo: '6 insulated pallets · 860 kg · Diagnostic reagents', route: 'Amsterdam Schiphol Pharma Center' }
+      ],
+      container: {
+        id: '20ft Envirotainer e2 #APEX-R-99014',
+        badge: 'Active cooling valid',
+        pvgW: '42%', sinW: '38%', hamW: '16%',
+        cube: '96.0% thermal cube',
+        mbl: 'AWB-COLD-88204',
+        customs: 'Priority green lane',
+        dwell: '28 min apron transfer'
+      },
+      dispatches: [
+        { dest: 'Dubai DWC Pharma Hub', status: 'Temperature verified (+3.8°C)', route: 'Reefer dock handover · Ramp 12', timing: 'Departed 08:45 UTC · On schedule' },
+        { dest: 'Chicago O\'Hare Medical Ring', status: 'Cold-chain audit passed', route: 'Dedicated dual-temp reefer fleet', timing: 'Departed 12:20 UTC · Direct tarmac' },
+        { dest: 'Singapore Tuas Biomedical Park', status: 'e-POD & datalogger released', route: 'Bonded hospital delivery route', timing: 'Delivered 16:30 UTC · Calibrated intact' }
+      ]
+    },
+    automotive: {
+      stream: 'Automotive Just-in-Time · Munich & Busan to Detroit Gateway (DTW)',
+      manifests: [
+        { ref: 'CMR-77140-MUC', tag: 'Sequenced rack', cargo: '16 module cradles · 5,400 kg · EV battery packs', route: 'Munich North Linehaul Dock' },
+        { ref: 'BOL-89021-PUS', tag: 'Barcoded chassis', cargo: '10 custom stillages · 4,100 kg · Steering gear', route: 'Port of Busan New Terminal 3' },
+        { ref: 'AWB-50114-NGO', tag: 'Critical intake', cargo: '6 wire harnesses · 720 kg · Micro-controllers', route: 'Nagoya Centrair Apron Fast-Track' }
+      ],
+      container: {
+        id: '53ft Intermodal Maxi #APEX-A-11048',
+        badge: 'Line-sequenced',
+        pvgW: '48%', sinW: '32%', hamW: '16%',
+        cube: '96.0% cube density',
+        mbl: 'JIT-AUTO-40912',
+        customs: 'Automated tariff clearance',
+        dwell: '35 min cross-dock turn'
+      },
+      dispatches: [
+        { dest: 'Detroit Jefferson Assembly Plant', status: 'Dock slot locked', route: 'Dedicated linehaul shuttle · Dock 14', timing: 'ETA 11:00 UTC · In sequence' },
+        { dest: 'Leipzig Battery Integration Site', status: 'Line delivery verified', route: 'Direct rail corridor slot 8', timing: 'Departed 14:10 UTC · On time' },
+        { dest: 'Monterrey Manufacturing Campus', status: 'Customs cleared at border', route: 'Bonded cross-border express', timing: 'Delivered 18:45 UTC · Linefeed ready' }
+      ]
+    }
+  };
+
+  var scenarioBtns = document.querySelectorAll('.how-scenario-btn');
+  var metricEl = document.getElementById('howStatusMetric');
+  var stage1El = document.getElementById('stage1Manifests');
+  var stage3El = document.getElementById('stage3Dispatch');
+  var containerIdEl = document.getElementById('containerId');
+  var containerStatusEl = document.getElementById('containerStatus');
+  var loadPvgEl = document.getElementById('loadPvg');
+  var loadSinEl = document.getElementById('loadSin');
+  var loadHamEl = document.getElementById('loadHam');
+  var metaCubeEl = document.getElementById('metaCube');
+  var metaMblEl = document.getElementById('metaMbl');
+  var metaCustomsEl = document.getElementById('metaCustoms');
+  var metaDwellEl = document.getElementById('metaDwell');
+  var stageCards = document.querySelectorAll('.how-stage-card');
+
+  function renderScenario(key){
+    var sc = scenarios[key];
+    if(!sc) return;
+
+    if(metricEl) metricEl.textContent = sc.stream;
+
+    // Render Stage 1 Manifests
+    if(stage1El){
+      stage1El.innerHTML = sc.manifests.map(function(m){
+        return '<div class="manifest-item">' +
+          '<div class="manifest-top">' +
+            '<span class="manifest-ref">' + m.ref + '</span>' +
+            '<span class="manifest-tag">' + m.tag + '</span>' +
+          '</div>' +
+          '<div class="manifest-cargo">' + m.cargo + '</div>' +
+          '<div class="manifest-route">' + m.route + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // Render Stage 2 Container
+    if(containerIdEl) containerIdEl.textContent = sc.container.id;
+    if(containerStatusEl) containerStatusEl.textContent = sc.container.badge;
+    if(loadPvgEl){ loadPvgEl.style.width = sc.container.pvgW; loadPvgEl.textContent = key === 'pharma' ? 'FRA 42%' : (key === 'automotive' ? 'MUC 48%' : 'PVG 34%'); }
+    if(loadSinEl){ loadSinEl.style.width = sc.container.sinW; loadSinEl.textContent = key === 'pharma' ? 'BSL 38%' : (key === 'automotive' ? 'PUS 32%' : 'SIN 44%'); }
+    if(loadHamEl){ loadHamEl.style.width = sc.container.hamW; loadHamEl.textContent = key === 'pharma' ? 'AMS 16%' : (key === 'automotive' ? 'NGO 16%' : 'HAM 18%'); }
+    if(metaCubeEl) metaCubeEl.textContent = sc.container.cube;
+    if(metaMblEl) metaMblEl.textContent = sc.container.mbl;
+    if(metaCustomsEl) metaCustomsEl.textContent = sc.container.customs;
+    if(metaDwellEl) metaDwellEl.textContent = sc.container.dwell;
+
+    // Render Stage 3 Dispatches
+    if(stage3El){
+      stage3El.innerHTML = sc.dispatches.map(function(d){
+        return '<div class="dispatch-item">' +
+          '<div class="dispatch-top">' +
+            '<span class="dispatch-dest">' + d.dest + '</span>' +
+            '<span class="dispatch-status">' + d.status + '</span>' +
+          '</div>' +
+          '<div class="dispatch-route">' + d.route + '</div>' +
+          '<div class="dispatch-timing">' + d.timing + '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  scenarioBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      scenarioBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var key = btn.getAttribute('data-scenario');
+      renderScenario(key);
+    });
+  });
+
+  stageCards.forEach(function(card){
+    card.addEventListener('click', function(){
+      stageCards.forEach(function(c){ c.classList.remove('active'); });
+      card.classList.add('active');
+    });
+  });
+})();
+
+/* INTERSECTION OBSERVER — sections, tiles, steps, counters */
+var io=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in-view');io.unobserve(e.target);}});
+},{threshold:0.1});
+document.querySelectorAll('.reveal,.tile,.how-col,.counter,.stat-mosaic,.cta-statement,.photo-drift').forEach(function(el){io.observe(el);});
+
+/* COUNTER ANIMATION */
+var countersRun=false;
+function animateCounters(){
+  if(countersRun)return;countersRun=true;
+  document.querySelectorAll('[data-count]').forEach(function(el){
+    var target=parseFloat(el.dataset.count),
+        suffix=el.dataset.suffix||'',
+        dec=parseInt(el.dataset.dec||(target%1?1:0)),
+        dur=1600,start=performance.now();
+    function tick(now){
+      var t=Math.min(1,(now-start)/dur),eased=1-Math.pow(1-t,3),val=target*eased;
+      el.textContent=(dec?val.toFixed(dec):Math.round(val).toLocaleString('en-US'))+suffix;
+      if(t<1)requestAnimationFrame(tick);
+      else el.textContent=(dec?target.toFixed(dec):target.toLocaleString('en-US'))+suffix;
+    }
+    requestAnimationFrame(tick);
+  });
+}
+var cio=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting){animateCounters();cio.disconnect();}});
+},{threshold:0.15});
+var st=document.getElementById('stats');if(st)cio.observe(st);
+
+/* TRACKER */
+var stepsDef=['Picked up','Departed origin','In transit','Customs cleared','Arrived at hub','Out for delivery','Delivered'];
+function buildPipeline(){
+  var pipe=document.getElementById('pipeline');if(!pipe)return;pipe.innerHTML='';
+  stepsDef.forEach(function(s,i){
+    var step=document.createElement('div');step.className='pipe-step';step.setAttribute('role','listitem');
+    step.innerHTML='<div class="pipe-dot" data-dot="'+i+'"></div><div class="pipe-connector" data-conn="'+i+'"></div><div class="pipe-label">'+s+'</div>';
+    pipe.appendChild(step);
+  });
+}
+buildPipeline();
+var trackTimer=null;
+function hashCode(s){var h=0;for(var i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0;}return h;}
+function doTrack(ref){
+  var err=document.getElementById('trackErr');
+  if(!ref||ref.length<6){err.style.display='block';return;}
+  err.style.display='none';
+  document.getElementById('trackRef').textContent=ref.toUpperCase();
+  var lanes=[
+    {o:'Shanghai (PVG)',d:'Rotterdam (RTM)',m:'Ocean FCL',t:'28 days'},
+    {o:'Los Angeles (LAX)',d:'Frankfurt (FRA)',m:'Air freight',t:'2.1 days'},
+    {o:'Singapore (SIN)',d:'Dubai (DXB)',m:'Air freight',t:'1.6 days'},
+    {o:'Busan (PUS)',d:'Long Beach (LGB)',m:'Ocean FCL',t:'16 days'}
+  ];
+  var lane=lanes[Math.abs(hashCode(ref))%lanes.length];
+  document.getElementById('dOrigin').textContent=lane.o;
+  document.getElementById('dDest').textContent=lane.d;
+  document.getElementById('dMode').textContent=lane.m;
+  document.getElementById('dEta').textContent=lane.t;
+  document.getElementById('trackDetail').classList.add('visible');
+  document.querySelectorAll('.pipe-dot').forEach(function(d){d.className='pipe-dot';});
+  document.querySelectorAll('.pipe-connector').forEach(function(c){c.className='pipe-connector';});
+  var status=document.getElementById('trackStatus');status.textContent='In progress';
+  var max=Math.min(stepsDef.length-1,2+(Math.abs(hashCode(ref))%4)),i=0;
+  clearInterval(trackTimer);
+  trackTimer=setInterval(function(){
+    if(i>max){clearInterval(trackTimer);return;}
+    var dots=document.querySelectorAll('.pipe-dot'),conns=document.querySelectorAll('.pipe-connector');
+    if(dots[i])dots[i].className='pipe-dot active';
+    if(i>0&&dots[i-1])dots[i-1].className='pipe-dot done';
+    if(i>0&&conns[i-1])conns[i-1].className='pipe-connector done';
+    i++;
+    if(i>max){var last=dots[max];if(last)last.className='pipe-dot done';status.textContent=max===stepsDef.length-1?'Delivered':'In transit';}
+  },280);
+}
+var tf=document.getElementById('trackForm');
+if(tf)tf.addEventListener('submit',function(e){e.preventDefault();doTrack(document.getElementById('trackInput').value.trim());});
+
+/* ESTIMATOR */
+var ef=document.getElementById('estForm');
+if(ef)ef.addEventListener('submit',function(e){
+  e.preventDefault();
+  var origin=document.getElementById('estOrigin').value.trim(),
+      dest=document.getElementById('estDest').value.trim(),
+      w=parseFloat(document.getElementById('estWeight').value),ok=true;
+  if(origin.length<2){document.getElementById('eOrigin').style.display='block';ok=false;}else document.getElementById('eOrigin').style.display='none';
+  if(dest.length<2){document.getElementById('eDest').style.display='block';ok=false;}else document.getElementById('eDest').style.display='none';
+  if(isNaN(w)||w<=0){document.getElementById('eWeight').style.display='block';ok=false;}else document.getElementById('eWeight').style.display='none';
+  if(!ok)return;
+  var mode=document.getElementById('estMode').value;
+  var rates={air:{b:85,p:2.3,t:'2.1 days'},ocean:{b:180,p:.45,t:'28 days'},lcl:{b:95,p:.8,t:'24 days'},road:{b:60,p:.6,t:'5.4 days'}}[mode];
+  var price=rates.b+rates.p*w;
+  document.getElementById('estPrice').textContent='$'+price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('estTransit').textContent=rates.t;
+  document.getElementById('estLane').textContent=origin+' → '+dest;
+  var res=document.getElementById('estResult');
+  res.style.display='block';res.style.opacity='0';res.style.transform='translateY(12px)';
+  res.style.transition='opacity 400ms ease,transform 400ms ease';
+  requestAnimationFrame(function(){res.style.opacity='1';res.style.transform='translateY(0)';});
+});
+
+var lb=document.getElementById('leadSubmit');
+if(lb)lb.addEventListener('click',function(){
+  var name=document.getElementById('leadName').value.trim(),
+      email=document.getElementById('leadEmail').value.trim();
+  if(name.length<2||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    document.getElementById('eLead').style.display='block';return;
+  }
+  document.getElementById('eLead').style.display='none';
+  document.getElementById('leadOk').style.display='block';
+  lb.disabled=true;lb.textContent='Quote request sent';lb.style.opacity='.6';
+});
+
+/* VIDEO + REDUCED MOTION */
+if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){
+  var v=document.querySelector('.hero-media video');
+  if(v){v.pause();v.removeAttribute('autoplay');}
+}
+
+/* PHOTO STRIP PARALLAX */
+(function(){
+  var strip=document.querySelector('.photo-strip');if(!strip)return;
+  var imgs=strip.querySelectorAll('img');
+  window.addEventListener('scroll',function(){
+    var rect=strip.getBoundingClientRect();
+    if(rect.bottom<0||rect.top>window.innerHeight)return;
+    var pct=(window.innerHeight-rect.top)/(window.innerHeight+rect.height),shift=(pct-.5)*24;
+    imgs.forEach(function(img,i){img.style.transform='translateY('+(shift*(i%2===0?1:-1))+'px)';});
+  },{passive:true});
+})();
+</script>
+</body>
+</html>

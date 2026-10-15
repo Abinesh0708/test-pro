@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>APEX Logistics & Supply Chain — Move freight on time</title>
+<meta name="description" content="APEX Logistics: global freight by air, ocean and ground. 320 hubs, 86 countries, one control tower. Track shipments, get lane estimates." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f4f4f4;
+    --ink: #111111;
+    --muted: #6b6b6b;
+    --accent: #1a4be0;
+    --accent-ink: #ffffff;
+    --field: #111111;
+    --field-ink: #ffffff;
+    --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+    --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+    --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+    --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+    --step-display: clamp(5.5rem, 9.8vw, 9.375rem);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Hanken Grotesk', system-ui, sans-serif;
+    font-weight: 400;
+    font-size: var(--step-body);
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 { font-weight: 500; letter-spacing: -0.05em; line-height: 0.9; margin: 0; }
+  p { margin: 0 0 1em; max-width: 68ch; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  img, video { display: block; max-width: 100%; height: auto; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+  .axis-pad { padding-left: 42%; }
+  .lead-col { margin-left: 42%; max-width: 40ch; }
+  .form-col { margin-left: 42%; max-width: 720px; }
+  .side-col { width: 42%; padding-right: 32px; }
+  .grid-12 { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; }
+  .mosaic-phone { display: none; }
+
+  /* Nav */
+  .nav {
+    position: fixed; inset: 0 0 auto 0; z-index: 60;
+    background: var(--bg);
+    padding: 14px 0;
+  }
+  .nav .container { display: flex; align-items: center; justify-content: space-between; }
+  .wordmark { font-weight: 500; font-size: 1.05rem; letter-spacing: -0.04em; color: var(--ink); }
+  .wordmark span { color: var(--accent); }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { color: var(--ink); font-size: var(--step-small); text-decoration: none; }
+  .nav-links a:hover { color: var(--accent); }
+  .action-ink {
+    background: var(--field); color: var(--field-ink);
+    padding: 10px 18px; font-size: var(--step-small); font-weight: 500;
+    border-radius: 0; border: 0; cursor: pointer; display: inline-block;
+    transition: transform 120ms ease;
+  }
+  .action-ink:hover { transform: translateY(-1px); }
+  .action-ink:active { transform: translateY(0); }
+
+  /* Hero */
+  .hero { padding-top: 72px; }
+  .hero-media { position: relative; width: 100%; height: 45vh; overflow: hidden; background: var(--surface); }
+  .hero-media video { width: 100%; height: 100%; object-fit: cover; }
+  .accent-tile {
+    width: 260px; padding: 24px; background: var(--accent); color: var(--accent-ink);
+    margin-top: -90px; margin-left: 42%; position: relative; z-index: 2;
+  }
+  .accent-tile .fig { font-size: var(--step-head); line-height: 0.85; letter-spacing: -0.05em; font-weight: 500; }
+  .accent-tile .cap { font-size: var(--step-small); margin-top: 6px; }
+  .hero-title { padding: 96px 0 0; }
+  .headline { font-size: var(--step-display); margin: 0 0 24px; }
+  .line { display: block; overflow: hidden; }
+  .line-inner { display: block; transform: translateY(105%); animation: lineReveal 900ms cubic-bezier(.16,1,.3,1) both; }
+  .line:nth-child(2) .line-inner { animation-delay: 110ms; }
+  @keyframes lineReveal { to { transform: translateY(0); } }
+  .standfirst { font-size: var(--step-lead); max-width: 34ch; margin-bottom: 32px; color: var(--ink); }
+  .standfirst .meta { display: block; font-size: var(--step-body); color: var(--ink); margin-top: 12px; }
+  .hero .action-ink { margin-top: 8px; }
+
+  /* Features mosaic */
+  .features { padding: 120px 0; }
+  .mosaic { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: 96px; gap: 8px; }
+  .tile { padding: 24px; background: var(--surface); overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; }
+  .tile-photo { padding: 0; }
+  .tile-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .tile-fig { background: var(--field); color: var(--field-ink); justify-content: space-between; }
+  .tile-fig .cap { color: #cfcfcf; }
+  .tile-fig .fig { font-size: var(--step-head); line-height: 0.85; }
+  .tile-fig .cap { font-size: var(--step-small); color: #cfcfcf; }
+  .tile-accent { background: var(--accent); color: var(--accent-ink); }
+  .tile h2, .tile h3 { font-size: var(--step-lead); margin-bottom: 12px; }
+  .tile p { font-size: var(--step-body); }
+  .tile ul { list-style: none; padding: 0; margin: 0; font-size: var(--step-body); }
+  .tile ul li { padding: 6px 0; border: 0; }
+  .tile .statline { font-size: var(--step-small); color: var(--muted); margin-top: auto; }
+  /* spans */
+  .t-head { grid-column: 1 / 7; grid-row: 1 / 6; }
+  .t-photo1 { grid-column: 7 / 13; grid-row: 1 / 4; }
+  .t-fig { grid-column: 7 / 10; grid-row: 4 / 6; }
+  .t-list { grid-column: 10 / 13; grid-row: 4 / 7; }
+  .t-sent1 { grid-column: 1 / 7; grid-row: 6 / 8; background: var(--bg); }
+  .t-photo2 { grid-column: 7 / 10; grid-row: 6 / 9; }
+  .t-sent2 { grid-column: 10 / 13; grid-row: 7 / 9; background: var(--bg); }
+
+  /* How-it-works */
+  .how { padding: 120px 0; background: var(--surface); }
+  .scatter-svg { width: 100%; height: auto; aspect-ratio: 4.5 / 1; display: block; margin: 48px 0; overflow: visible; }
+  .how-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 24px; }
+  .how-cols h3 { font-size: var(--step-lead); margin-bottom: 8px; }
+  .how-cols p { font-size: var(--step-body); color: var(--ink); }
+
+  /* Tracker */
+  .tracker { padding: 120px 0; }
+  .tracker input, .tracker select, .est input, .est select {
+    background: var(--bg); border: 0; border-bottom: 1px solid var(--ink);
+    padding: 12px 0; font: inherit; width: 100%; border-radius: 0;
+  }
+  .steps { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 32px; }
+  .step { flex: 1; min-width: 90px; }
+  .step .dot { width: 12px; height: 12px; background: var(--surface); margin-bottom: 8px; }
+  .step .dot.done, .step .dot.active { background: var(--accent); }
+  .step .label { font-size: var(--step-small); }
+  .step .line { display: none; margin: 6px 0; width: 100%; transition: background 300ms; }
+  .step .line.done { background: var(--accent); }
+
+  /* Stats */
+  .stats { padding: 120px 0; }
+  .stat-mosaic { display: grid; grid-template-columns: 2fr 1fr; height: 66vh; max-height: 560px; overflow: hidden; }
+  .stat-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .stat-tiles { display: flex; flex-direction: column; }
+  .stat-tile { flex: 1; padding: 28px; display: flex; flex-direction: column; justify-content: flex-start; }
+  .stat-tile:first-child { background: var(--surface); color: var(--ink); }
+  .stat-tile:last-child { background: var(--field); color: var(--field-ink); }
+  .stat-tile .fig { font-size: var(--step-head); line-height: 0.85; margin-bottom: 8px; }
+  .stat-tile .cap { font-size: var(--step-small); }
+  .stat-tile:last-child .cap { color: #cfcfcf; }
+  .counters { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; margin-top: 48px; }
+  .counter .num { font-size: var(--step-head); line-height: 0.9; }
+  .counter .label { font-size: var(--step-small); color: var(--muted); margin-top: 8px; }
+
+  /* Quote */
+  .quote { padding: 120px 0; background: var(--surface); }
+  .est-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .result { margin-top: 32px; padding: 24px; background: var(--bg); }
+  .result .price { font-size: var(--step-head); }
+
+  /* CTA strip */
+  .cta { padding: 0 0 120px; }
+  .photo-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; height: 40vh; overflow: hidden; }
+  .photo-strip img { width: 100%; height: 100%; object-fit: cover; }
+  .cta-band { background: var(--field); color: var(--field-ink); padding: 64px 0 80px; position: relative; min-height: 44vh; }
+  .cta-band .statement { font-size: var(--step-lead); max-width: 34ch; line-height: 1.2; }
+  .cta-band .statement a { color: var(--field-ink); text-decoration: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; text-decoration-color: var(--accent); }
+  .cta-band .note { font-size: var(--step-body); margin-top: 24px; color: #cfcfcf; }
+  .cta-portrait { position: absolute; right: 32px; bottom: 32px; width: 150px; height: 188px; object-fit: cover; }
+
+  /* Footer */
+  .footer { background: var(--field); color: var(--field-ink); padding: 0 0 64px; overflow: hidden; min-height: 90vh; }
+  .footer-name { font-size: clamp(4rem, 12vw, 10rem); line-height: 0.85; letter-spacing: -0.05em; font-weight: 500; height: 0.75em; overflow: hidden; margin: 0 0 64px; color: var(--field-ink); }
+  .footer .container { padding-top: 48px; }
+  .footer-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 32px; align-items: start; }
+  .footer-places { display: flex; flex-direction: column; gap: 4px; }
+  .footer-places a { color: var(--accent); font-size: var(--step-lead); text-decoration: none; }
+  .footer-places a:hover { text-decoration: underline; }
+  .footer-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .footer-links h4 { font-size: var(--step-small); color: var(--muted); margin-bottom: 12px; font-weight: 400; }
+  .footer-links ul { list-style: none; padding: 0; margin: 0; font-size: var(--step-small); }
+  .footer-links li { margin-bottom: 6px; }
+  .footer-links a { color: var(--field-ink); text-decoration: none; }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-legal { display: flex; justify-content: space-between; margin-top: 96px; font-size: var(--step-small); color: var(--muted); }
+  .footer-legal a { color: var(--muted); }
+  .credits { font-size: var(--step-small); color: var(--muted); margin-top: 24px; line-height: 1.5; }
+  .credits a { color: var(--muted); text-decoration: underline; }
+
+  /* Reveal */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 600ms ease, transform 600ms ease; }
+  .reveal.in-view { opacity: 1; transform: translateY(0); }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .line-inner { animation: none; transform: none; }
+    .standfirst, .hero .action-ink, .reveal { opacity: 1; transform: none; transition: none; animation: none; }
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .container { padding: 0 20px; }
+    .axis-pad { padding-left: 0; }
+    .lead-col { margin-left: 0; max-width: none; }
+    .form-col { margin-left: 0; max-width: none; }
+    .side-col { width: 100%; padding-right: 0; margin-bottom: 24px; }
+    .nav-links { display: none; }
+    .hero-media { height: 40vh; }
+    .accent-tile { margin-left: 0; margin-top: -40px; width: 180px; padding: 16px; }
+    .accent-tile .fig { font-size: var(--step-lead); }
+    .mosaic { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 140px; }
+    .t-head, .t-photo1, .t-sent1, .t-photo2, .t-sent2 { grid-column: 1 / -1; }
+    .t-fig, .t-list { grid-column: auto; }
+    .how-cols { grid-template-columns: 1fr; }
+    .stat-mosaic { grid-template-columns: 1fr; height: auto; }
+    .stat-photo { height: 40vh; }
+    .stat-tiles { flex-direction: row; }
+    .stat-tile { min-height: 160px; }
+    .counters { grid-template-columns: repeat(2, 1fr); }
+    .est-grid { grid-template-columns: 1fr; }
+    .photo-strip { grid-template-columns: 1fr; height: auto; }
+    .photo-strip img { height: 32vh; }
+    .cta-portrait { width: 96px; height: 120px; }
+    .footer-name { font-size: clamp(3rem, 14vw, 5rem); }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-links { grid-template-columns: repeat(2, 1fr); }
+    .footer-legal { flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container">
+    <a href="#top" class="wordmark">APEX <span>LOGISTICS</span></a>
+    <nav class="nav-links">
+      <a href="#features">Services</a>
+      <a href="#tracker">Track</a>
+      <a href="#how">Process</a>
+      <a href="#stats">Network</a>
+      <a href="#quote">Quote</a>
+    </nav>
+    <button class="action-ink" onclick="document.getElementById('tracker').scrollIntoView({behavior:'smooth'})">Track shipment</button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section id="top" class="hero">
+    <div class="hero-media">
+      <video autoplay muted loop playsinline preload="metadata" poster="assets/hamburg-timelapse-test-poster.jpg" width="854" height="480" aria-hidden="true">
+        <source src="assets/hamburg-timelapse-test.webm" type="video/webm" />
+      </video>
+    </div>
+    <div class="container">
+      <div class="accent-tile">
+        <div class="fig" id="heroOnTime">99.2%</div>
+      </div>
+    </div>
+
+    <div class="container hero-title axis-pad">
+      <h1 class="headline">
+        <span class="line"><span class="line-inner">Move</span></span>
+        <span class="line"><span class="line-inner">on time.</span></span>
+      </h1>
+      <p class="standfirst reveal">
+        Air, ocean and ground freight in one control tower. 320 hubs across 86 countries, one promise on every shipment.
+        <span class="meta">AWB, bill of lading or container number. One reference, every mode. 99.2% on-time delivery, rolling 30 days.</span>
+      </p>
+      <button class="action-ink" onclick="document.getElementById('tracker').scrollIntoView({behavior:'smooth'})">Track a shipment</button>
+    </div>
+  </section>
+
+  <!-- FEATURES MOSAIC -->
+  <section id="features" class="features">
+    <div class="container">
+      <div class="side-col reveal" style="margin-bottom:48px;">
+        <h2 style="font-size: var(--step-head);">Freight without surprises.</h2>
+        <p style="margin-top:16px; color: var(--ink);">Six capabilities, one operating system. Each one accountable to a milestone you can see.</p>
+      </div>
+    </div>
+    <div class="container">
+      <div class="mosaic">
+        <div class="tile t-head">
+          <h2>Six services, one system.</h2>
+          <p style="margin-top:16px; color: var(--ink);">Air, ocean, ground, warehousing and supply-chain consulting on lanes we run weekly.</p>
+          <p class="statline">99.6% on-time pickup; 2.1-day air transit; 14,200 TEU monthly.</p>
+        </div>
+        <div class="tile tile-photo t-photo1">
+          <img src="assets/singapore-port-panorama.jpg" width="1920" height="354" alt="Panorama of the Port of Singapore at dusk" loading="lazy" decoding="async" />
+        </div>
+        <div class="tile tile-fig t-fig">
+          <div class="fig">320</div>
+          <div class="cap">hubs on five continents</div>
+        </div>
+        <div class="tile t-list">
+          <ul>
+            <li>Air freight</li>
+            <li>Ocean freight, FCL and LCL</li>
+            <li>Ground trucking, FTL and LTL</li>
+            <li>Warehousing and 3PL</li>
+            <li>Customs brokerage</li>
+            <li>Supply-chain consulting</li>
+          </ul>
+          <p class="statline" style="margin-top:16px;">One reference covers every mode.</p>
+        </div>
+        <div class="tile t-sent1">
+          <p style="font-size: var(--step-lead); line-height: 1.2;">Exceptions surface before you ask.</p>
+          <p style="color: var(--muted); font-size: var(--step-small); margin-top:12px;">A customs hold or a reroute is flagged in minutes, not days.</p>
+        </div>
+        <div class="tile tile-photo t-photo2">
+          <img src="assets/maersk-hanoi-container-ship-port-koper-sikop.jpg" width="1920" height="1439" alt="Container ship MAERSK HANOI at Port Koper" loading="lazy" decoding="async" />
+        </div>
+        <div class="tile t-sent2">
+          <p style="font-size: var(--step-lead); line-height: 1.2;">Pricing by lane, not by category.</p>
+          <p style="color: var(--muted); font-size: var(--step-small); margin-top:12px;">Market rates updated hourly, all in.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="how">
+    <div class="container axis-pad reveal">
+      <h2 style="font-size: var(--step-head);">Collect. Consolidate. Deliver.</h2>
+      <p style="margin-top:16px; color: var(--ink); max-width: 40ch;">One document, one status, one owner. The path from order to delivery is engineered, not improvised.</p>
+    </div>
+    <div class="container" style="margin-top: 64px;">
+      <svg class="scatter-svg" viewBox="0 0 900 200" aria-hidden="true" role="img" aria-label="Diagram: many shipments become one delivery">
+        <g id="scatter" fill="#111111" opacity="0.35"></g>
+        <g id="ribbon" fill="#111111"></g>
+        <g id="order" fill="#1a4be0"></g>
+      </svg>
+      <div class="how-cols reveal">
+        <div>
+          <h3>Collect</h3>
+          <p>Cargo, documents and data enter once, with mode and origin normalised.</p>
+        </div>
+        <div>
+          <h3>Consolidate</h3>
+          <p>Carriers, lanes and customs are optimised as one network.</p>
+        </div>
+        <div>
+          <h3>Deliver</h3>
+          <p>Dispatch with live milestones and proof of delivery within hours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRACKER -->
+  <section id="tracker" class="tracker">
+    <div class="container">
+      <h2 style="font-size: var(--step-head);">Track.</h2>
+      <p style="margin-top:16px; color: var(--ink); max-width: 40ch;">Real-time status for every APEX reference. Enter an AWB, bill of lading or container number.</p>
+    </div>
+    <div class="container" style="margin-top:48px;">
+      <div style="display:grid; grid-template-columns: 5fr 7fr; gap:32px; align-items:start;">
+        <div>
+          <p style="color: var(--muted);">Every reference, one timeline. Exceptions surface before you ask, and proof of delivery lands in hours.</p>
+        </div>
+        <div>
+          <form id="trackForm">
+            <input id="trackInput" type="text" placeholder="APEX-7742910-DEL or MSCU1234567" aria-label="Tracking reference" />
+            <button type="submit" class="action-ink" style="margin-top:16px;">Track shipment</button>
+            <div id="trackErr" style="color:#b00020; font-size: var(--step-small); margin-top:8px; display:none;">Enter a reference of at least 6 characters.</div>
+          </form>
+
+          <div style="margin-top:24px; font-size: var(--step-small); color: var(--muted);">
+            Reference: <span id="trackRef" style="color: var(--ink); font-weight:500;">-</span>
+            <span style="float:right;" id="trackStatus">Awaiting input</span>
+          </div>
+          <div id="trackSteps" class="steps"></div>
+          <div id="trackDetail" style="margin-top:24px; display:none;">
+            <div class="est-grid" style="gap:12px;">
+              <div><div style="font-size:var(--step-small); color:var(--muted);">Origin</div><div id="dOrigin" style="font-weight:500;">-</div></div>
+              <div><div style="font-size:var(--step-small); color:var(--muted);">Destination</div><div id="dDest" style="font-weight:500;">-</div></div>
+              <div><div style="font-size:var(--step-small); color:var(--muted);">Mode</div><div id="dMode" style="font-weight:500;">-</div></div>
+              <div><div style="font-size:var(--step-small); color:var(--muted);">ETA</div><div id="dEta" style="font-weight:500; color: var(--accent);">-</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats" class="stats">
+    <div class="container axis-pad reveal">
+      <h2 style="font-size: var(--step-head);">By the numbers.</h2>
+    </div>
+    <div class="container" style="margin-top:48px;">
+      <div class="stat-mosaic reveal">
+        <div class="stat-photo"><img src="assets/port-of-singapore-keppel-terminal.jpg" width="1920" height="1440" alt="Keppel Container Terminal in Singapore" loading="lazy" decoding="async" /></div>
+        <div class="stat-tiles">
+          <div class="stat-tile">
+            <div class="fig" data-count="320">0</div>
+            <div class="cap">active hubs</div>
+          </div>
+          <div class="stat-tile">
+            <div class="fig" data-count="86">0</div>
+            <div class="cap">countries covered</div>
+          </div>
+        </div>
+      </div>
+      <div class="counters">
+        <div class="counter reveal"><div class="num" data-count="12400000" data-suffix="">0</div><div class="label">metric tons annually</div></div>
+        <div class="counter reveal"><div class="num" data-count="99.2" data-suffix="%">0</div><div class="label">on-time delivery</div></div>
+        <div class="counter reveal"><div class="num" data-count="1840">0</div><div class="label">active lanes</div></div>
+        <div class="counter reveal"><div class="num" data-count="2.4" data-suffix="M" data-dec="1">0</div><div class="label">units shipped monthly</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section id="quote" class="quote">
+    <div class="container axis-pad">
+      <h2 style="font-size: var(--step-head);">Price your lane.</h2>
+      <p style="margin-top:16px; color: var(--ink); max-width:40ch;">A lane-aware estimate in seconds. Convert to a firm quote with one step.</p>
+    </div>
+    <div class="container form-col" style="margin-top:48px;">
+      <form id="estForm" class="est">
+        <div class="est-grid">
+          <div>
+            <label style="font-size: var(--step-small); color: var(--muted);">Origin</label>
+            <input id="estOrigin" type="text" placeholder="Shanghai (PVG)" />
+            <div id="eOrigin" style="color:#b00020; font-size: var(--step-small); display:none;">Origin required.</div>
+          </div>
+          <div>
+            <label style="font-size: var(--step-small); color: var(--muted);">Destination</label>
+            <input id="estDest" type="text" placeholder="Rotterdam (RTM)" />
+            <div id="eDest" style="color:#b00020; font-size: var(--step-small); display:none;">Destination required.</div>
+          </div>
+          <div>
+            <label style="font-size: var(--step-small); color: var(--muted);">Weight (kg)</label>
+            <input id="estWeight" type="number" min="1" placeholder="500" />
+            <div id="eWeight" style="color:#b00020; font-size: var(--step-small); display:none;">Valid weight required.</div>
+          </div>
+          <div>
+            <label style="font-size: var(--step-small); color: var(--muted);">Mode</label>
+            <select id="estMode">
+              <option value="air">Air freight</option>
+              <option value="ocean">Ocean FCL</option>
+              <option value="lcl">Ocean LCL</option>
+              <option value="road">Ground trucking</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="action-ink" style="margin-top:24px;">Get estimate</button>
+      </form>
+      <div id="estResult" class="result" style="display:none;">
+        <div style="font-size: var(--step-small); color: var(--muted);">Estimated all-in cost</div>
+        <div class="price" id="estPrice">$0.00</div>
+        <div style="font-size: var(--step-small); color: var(--muted); margin-top:8px;" id="estMeta">-</div>
+        <div style="margin-top:16px; display:grid; grid-template-columns: repeat(2,1fr); gap:12px; font-size: var(--step-small);">
+          <div><span style="color:var(--muted);">Transit</span><br /><span id="estTransit" style="font-weight:500;">-</span></div>
+          <div><span style="color:var(--muted);">Lane</span><br /><span id="estLane" style="font-weight:500;">-</span></div>
+        </div>
+        <form id="leadForm" style="margin-top:24px;">
+          <div class="est-grid">
+            <input id="leadName" type="text" placeholder="Full name" />
+            <input id="leadEmail" type="email" placeholder="Work email" />
+          </div>
+          <div id="eLead" style="color:#b00020; font-size: var(--step-small); margin-top:8px; display:none;">Name and valid email required.</div>
+          <button type="submit" class="action-ink" style="margin-top:16px; width:100%;">Convert to firm quote</button>
+          <div id="leadOk" style="color:#1a7f37; font-size: var(--step-small); margin-top:8px; display:none;">Quote request received. We will reply within two hours.</div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="photo-strip">
+      <img src="assets/the-new-container-ship-oocl-singapore-on.jpg" width="1920" height="1522" alt="Container ship OOCL Singapore at sea" loading="lazy" decoding="async" />
+      <img src="assets/port-of-singapore-keppel-terminal.jpg" width="1920" height="1440" alt="Keppel terminal cranes and containers" loading="lazy" decoding="async" />
+      <img src="assets/arabistan-wa-bahr-ahmar-arabian-peninsula-and.jpg" width="1920" height="1614" alt="1896 map of the Strait of Hormuz" loading="lazy" decoding="async" />
+    </div>
+    <div class="cta-band">
+      <div class="container axis-pad">
+        <p class="statement reveal">
+          Ten thousand shipments a month, and a single owner for each one.
+          <a href="mailto:quotes@apex-logistics.example?subject=Freight%20quote%20request">Request a firm quote</a>
+        </p>
+        <p class="note">Carbon options, bonded storage and customs brokerage on request. Terms indicative, final quote within two hours.</p>
+      </div>
+      <img class="cta-portrait" src="assets/maersk-hanoi-container-ship-port-koper-sikop.jpg" width="1920" height="1439" alt="Docked container vessel at quay" loading="lazy" decoding="async" />
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-name">APEX</div>
+    <div class="footer-grid">
+      <div class="footer-places">
+        <a href="#">Singapore</a>
+        <a href="#">Rotterdam</a>
+        <a href="#">Los Angeles</a>
+        <a href="#">Dubai</a>
+        <a href="#">Shanghai</a>
+        <div style="font-size: var(--step-small); color: var(--muted); margin-top:16px;">
+          hello@apex-logistics.example<br />+65 6000 0000
+        </div>
+      </div>
+      <div class="footer-links">
+        <div>
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#features">Air freight</a></li>
+            <li><a href="#features">Ocean freight</a></li>
+            <li><a href="#features">Ground trucking</a></li>
+            <li><a href="#features">Warehousing and 3PL</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Sustainability</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Press</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">API</a></li>
+            <li><a href="#">System status</a></li>
+            <li><a href="#">Privacy and terms</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-legal">
+      <span>© 2026 APEX Logistics Group. All rights reserved.</span>
+      <a href="#top">Back to top</a>
+    </div>
+    <p class="credits">
+      Pictures and footage: <a href="https://commons.wikimedia.org/w/index.php?curid=2991026">“Singapore port panorama”</a> by Kroisenbrunner., CC BY-SA 3.0; <a href="https://commons.wikimedia.org/w/index.php?curid=765596">“Port of Singapore Keppel Terminal”</a> by Calvin Teo, CC BY-SA 2.5; <a href="https://commons.wikimedia.org/w/index.php?curid=144715351">“MAERSK HANOI”</a> by Petar Milošević, CC BY-SA 4.0; <a href="https://commons.wikimedia.org/w/index.php?curid=33838919">“OOCL Singapore”</a> by Buonasera, CC BY-SA 3.0; <a href="https://commons.wikimedia.org/wiki/File:1896_Strait_of_Hormuz_map_(cropped).jpg">Hormuz map 1896</a>, public domain; <a href="https://commons.wikimedia.org/wiki/File:Hamburg_(Timelapse-Test).webm">“Hamburg (Timelapse-Test)”</a> by Christian Andersen, CC BY 3.0; all via Wikimedia Commons. Reused under their licences without alteration.
+    </p>
+  </div>
+</footer>
+
+<script>
+  /* scatter squares generated */
+  (function () {
+    const scatter = document.getElementById('scatter');
+    const ribbon = document.getElementById('ribbon');
+    const order = document.getElementById('order');
+    if (!scatter) return;
+    const W = 900, H = 200;
+    const S = 10;
+    function rects(g, points) { points.forEach(([x, y]) => {
+      const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', S); r.setAttribute('height', S);
+      g.appendChild(r);
+    }); }
+    // left scatter
+    const left = [];
+    for (let i = 0; i < 60; i++) left.push([20 + Math.random() * 260, 20 + Math.random() * 160]);
+    rects(scatter, left);
+    // middle ribbon three squares high
+    const mid = [];
+    for (let c = 0; c < 12; c++) for (let r = 0; r < 3; r++) mid.push([300 + c * (S + 4), 70 + r * (S + 4) + Math.random() * 6]);
+    rects(ribbon, mid);
+    // right ordered rows in accent colour: change fill via css? set attribute
+    const right = [];
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 14; c++) right.push([560 + c * (S + 6), 30 + r * (S + 6)]);
+    right.forEach(([x, y]) => {
+      const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', S); r.setAttribute('height', S);
+      r.setAttribute('fill', '#1a4be0');
+      order.appendChild(r);
+    });
+  })();
+
+  /* reveal on scroll */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* counters */
+  function animateCounters() {
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const target = parseFloat(el.dataset.count);
+      const suffix = el.dataset.suffix || '';
+      const dec = parseInt(el.dataset.dec || (target % 1 ? 1 : 0));
+      const dur = 1400; const start = performance.now();
+      function tick(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const val = target * eased;
+        el.textContent = (dec ? val.toFixed(dec) : Math.round(val).toLocaleString('en-US')) + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+        else el.textContent = (dec ? target.toFixed(dec) : target.toLocaleString('en-US')) + suffix;
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+  const cio = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { animateCounters(); cio.disconnect(); } });
+  }, { threshold: 0.2 });
+  const statsSection = document.getElementById('stats');
+  if (statsSection) cio.observe(statsSection);
+
+  /* tracker */
+  const stepsDef = ['Picked up','Departed origin','In transit','Customs cleared','Arrived at hub','Out for delivery','Delivered'];
+  function renderTrack() {
+    const wrap = document.getElementById('trackSteps');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    stepsDef.forEach((s, i) => {
+      const div = document.createElement('div');
+      div.className = 'step';
+      div.innerHTML = '<div class="dot" data-dot="' + i + '"></div><div class="label">' + s + '</div>';
+      wrap.appendChild(div);
+    });
+  }
+  renderTrack();
+  let trackTimer = null;
+  function hashCode(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h<<5)-h+s.charCodeAt(i); h|=0;} return h; }
+  function doTrack(ref) {
+    const err = document.getElementById('trackErr');
+    if (!ref || ref.length < 6) { err.style.display='block'; return; }
+    err.style.display='none';
+    document.getElementById('trackRef').textContent = ref.toUpperCase();
+    const lanes = [
+      { o:'Shanghai (PVG)', d:'Rotterdam (RTM)', m:'Ocean FCL', t:'28 days' },
+      { o:'Los Angeles (LAX)', d:'Frankfurt (FRA)', m:'Air freight', t:'2.1 days' },
+      { o:'Singapore (SIN)', d:'Dubai (DXB)', m:'Air freight', t:'1.6 days' },
+      { o:'Busan (PUS)', d:'Long Beach (LGB)', m:'Ocean FCL', t:'16 days' },
+    ];
+    const lane = lanes[Math.abs(hashCode(ref)) % lanes.length];
+    document.getElementById('dOrigin').textContent = lane.o;
+    document.getElementById('dDest').textContent = lane.d;
+    document.getElementById('dMode').textContent = lane.m;
+    document.getElementById('dEta').textContent = lane.t;
+    document.getElementById('trackDetail').style.display = 'block';
+    // reset
+    document.querySelectorAll('.step .dot').forEach(d => d.className='dot');
+    document.querySelectorAll('.step .line').forEach(l => l.className='line');
+    const status = document.getElementById('trackStatus');
+    status.textContent = 'In progress';
+    const max = Math.min(stepsDef.length - 1, 2 + (Math.abs(hashCode(ref)) % 4));
+    let i = 0;
+    clearInterval(trackTimer);
+    trackTimer = setInterval(() => {
+      if (i > max) { clearInterval(trackTimer); return; }
+      const dots = document.querySelectorAll('.step .dot');
+      const lines = document.querySelectorAll('.step .line');
+      if (dots[i]) dots[i].className = 'dot active';
+      if (i > 0 && dots[i-1]) dots[i-1].className = 'dot done';
+      if (i > 0 && lines[i-1]) lines[i-1].className = 'line done';
+      i++;
+      if (i > max) {
+        const last = dots[max]; if (last) last.className='dot done';
+        status.textContent = (max === stepsDef.length-1) ? 'Delivered' : 'In transit';
+      }
+    }, 300);
+  }
+  const trackForm = document.getElementById('trackForm');
+  if (trackForm) trackForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    doTrack(document.getElementById('trackInput').value.trim());
+  });
+
+  /* estimator */
+  const estForm = document.getElementById('estForm');
+  if (estForm) estForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const origin = document.getElementById('estOrigin').value.trim();
+    const dest = document.getElementById('estDest').value.trim();
+    const w = parseFloat(document.getElementById('estWeight').value);
+    let ok = true;
+    if (origin.length < 2) { document.getElementById('eOrigin').style.display='block'; ok=false; } else document.getElementById('eOrigin').style.display='none';
+    if (dest.length < 2) { document.getElementById('eDest').style.display='block'; ok=false; } else document.getElementById('eDest').style.display='none';
+    if (isNaN(w) || w <= 0) { document.getElementById('eWeight').style.display='block'; ok=false; } else document.getElementById('eWeight').style.display='none';
+    if (!ok) return;
+    const mode = document.getElementById('estMode').value;
+    const rates = { air:{b:85,p:2.3,t:'2.1 days'}, ocean:{b:180,p:0.45,t:'28 days'}, lcl:{b:95,p:0.8,t:'24 days'}, road:{b:60,p:0.6,t:'5.4 days'} }[mode];
+    const price = rates.b + rates.p * w;
+    const names = { air:'Air freight', ocean:'Ocean FCL', lcl:'Ocean LCL', road:'Ground trucking' };
+    document.getElementById('estPrice').textContent = '$' + price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('estMeta').textContent = 'Range ±8%, subject to lane availability and fuel surcharge.';
+    document.getElementById('estTransit').textContent = rates.t;
+    document.getElementById('estLane').textContent = origin + ' to ' + dest;
+    document.getElementById('estResult').style.display = 'block';
+  });
+
+  const leadForm = document.getElementById('leadForm');
+  if (leadForm) leadForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('leadName').value.trim();
+    const email = document.getElementById('leadEmail').value.trim();
+    if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById('eLead').style.display='block'; return;
+    }
+    document.getElementById('eLead').style.display='none';
+    document.getElementById('leadOk').style.display='block';
+  });
+
+  /* video reduced motion */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const v = document.querySelector('.hero-media video');
+    if (v) { v.pause(); v.removeAttribute('autoplay'); }
+  }
+</script>
+</body>
+</html>
