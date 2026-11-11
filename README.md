@@ -1,4 +1,4 @@
-# APEX Logistics — Freight & Supply Chain Website Template
+# APEX Logistics - Freight & Supply Chain Website Template
 
 A responsive, editorial landing page template built for global freight forwarders, 3PL providers, cargo carriers, and supply chain platforms. Delivered as a self-contained HTML5, CSS3, and vanilla JavaScript package with **zero build tools or runtime framework dependencies**.
 
